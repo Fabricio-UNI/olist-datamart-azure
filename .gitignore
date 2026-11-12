@@ -1,0 +1,17 @@
+# Datos: no se suben (se descargan desde Kaggle)
+data/
+*.csv
+*.zip
+
+# Secretos y credenciales: NUNCA al repositorio
+.env
+*.env
+secrets.*
+*.publishsettings
+local.settings.json
+
+# Sistema / editores
+.DS_Store
+Thumbs.db
+.vscode/
+__pycache__/
