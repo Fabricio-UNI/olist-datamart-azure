@@ -1,0 +1,15 @@
+{
+	"name": "adf-olist-fabri01",
+	"properties": {
+		"trustModeClaimForMi": {
+			"value": "Disabled",
+			"editable": true
+		}
+	},
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "ec1e06c2-3257-4be7-8732-c4c01ec94754",
+		"tenantId": "3ae272d3-6b82-46f2-86e8-c3bde0631092"
+	}
+}
