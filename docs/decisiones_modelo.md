@@ -2,7 +2,7 @@
 
 > Documento de diseño de la capa **oro** (data mart en Azure SQL Database).
 > Metodología: Kimball (proceso de negocio → grano → dimensiones → hechos).
-> Última actualización: 2026-11-13.
+> Última actualización: 2026-11-18.
 
 ---
 
@@ -51,6 +51,137 @@ Conteos aproximados según Kaggle; **se confirman en el perfilamiento**.
 | 7 | `olist_sellers_dataset` | 1 vendedor | `seller_id` | 3,095 | `dim_vendedor`, `dim_ubicacion` |
 | 8 | `product_category_name_translation` | 1 categoría | `product_category_name` | 71 | Enriquece `dim_producto` |
 | 9 | `olist_geolocation_dataset` | 1 punto de un código postal | ninguna | 1,000,163 | Fuera de alcance (v1) |
+
+### Especificación de cada CSV (diccionario de datos de origen)
+
+Tipos lógicos (los CSV no traen tipos: todo llega como texto y se convierte en plata).
+PK = llave primaria · FK = llave foránea (apunta a otra tabla).
+
+#### 1. `olist_orders_dataset.csv` — pedidos
+Grano: 1 fila = 1 pedido · Llave: `order_id` · Vista de perfilamiento: `v_orders`
+
+| Columna | Tipo | Llave | Qué es |
+|---|---|---|---|
+| `order_id` | texto (32) | PK | Identificador del pedido |
+| `customer_id` | texto (32) | FK → customers | Cliente **de este pedido** (uno nuevo por pedido, ver hallazgo 4) |
+| `order_status` | texto | | Estado: delivered, shipped, canceled, unavailable, invoiced, processing, created, approved |
+| `order_purchase_timestamp` | fecha y hora | | Cuándo se hizo la compra |
+| `order_approved_at` | fecha y hora | | Cuándo se aprobó el pago |
+| `order_delivered_carrier_date` | fecha y hora | | Cuándo se entregó a la transportista |
+| `order_delivered_customer_date` | fecha y hora | | Cuándo llegó al cliente |
+| `order_estimated_delivery_date` | fecha | | Fecha de entrega prometida al cliente |
+
+#### 2. `olist_order_items_dataset.csv` — productos de cada pedido
+Grano: 1 fila = 1 unidad de producto en un pedido · Llave: `order_id` + `order_item_id` · Vista: `v_order_items`
+
+| Columna | Tipo | Llave | Qué es |
+|---|---|---|---|
+| `order_id` | texto (32) | PK (1/2), FK → orders | Pedido al que pertenece el ítem |
+| `order_item_id` | entero | PK (2/2) | Correlativo del ítem dentro del pedido (1, 2, 3…). No hay columna de cantidad: 3 unidades = 3 filas |
+| `product_id` | texto (32) | FK → products | Producto vendido |
+| `seller_id` | texto (32) | FK → sellers | Vendedor que lo vendió |
+| `shipping_limit_date` | fecha y hora | | Fecha límite para que el vendedor despache |
+| `price` | decimal | | Precio del ítem |
+| `freight_value` | decimal | | Costo del flete de ese ítem |
+
+#### 3. `olist_order_payments_dataset.csv` — pagos
+Grano: 1 fila = 1 pago de un pedido · Llave: `order_id` + `payment_sequential` · Vista: `v_payments`
+
+| Columna | Tipo | Llave | Qué es |
+|---|---|---|---|
+| `order_id` | texto (32) | PK (1/2), FK → orders | Pedido pagado |
+| `payment_sequential` | entero | PK (2/2) | Número del pago dentro del pedido (1, 2…). Varias filas = varios medios de pago (ej. voucher + tarjeta) |
+| `payment_type` | texto | | Medio: credit_card, boleto, voucher, debit_card, not_defined |
+| `payment_installments` | entero | | Número de cuotas (10 cuotas = 1 sola fila) |
+| `payment_value` | decimal | | Monto pagado en ese pago |
+
+#### 4. `olist_order_reviews_dataset.csv` — reseñas (fuera de alcance v1)
+Grano: 1 fila = 1 reseña · Llave: ninguna confiable (`review_id` se repite)
+
+| Columna | Tipo | Llave | Qué es |
+|---|---|---|---|
+| `review_id` | texto (32) | | Identificador de la reseña (no es único) |
+| `order_id` | texto (32) | FK → orders | Pedido reseñado |
+| `review_score` | entero | | Calificación de 1 a 5 |
+| `review_comment_title` | texto | | Título del comentario |
+| `review_comment_message` | texto | | Comentario en portugués (puede traer saltos de línea) |
+| `review_creation_date` | fecha | | Cuándo se envió la encuesta |
+| `review_answer_timestamp` | fecha y hora | | Cuándo respondió el cliente |
+
+#### 5. `olist_customers_dataset.csv` — clientes
+Grano: 1 fila = 1 `customer_id` (uno por pedido) · Llave: `customer_id` · Vista: `v_customers`
+
+| Columna | Tipo | Llave | Qué es |
+|---|---|---|---|
+| `customer_id` | texto (32) | PK | Cliente **en un pedido específico**. Se genera uno nuevo en cada compra (relación 1 a 1 con orders) |
+| `customer_unique_id` | texto (32) | | La **persona real**. Se repite si la persona compró varias veces. Es la llave de negocio de `dim_cliente` (D5) |
+| `customer_zip_code_prefix` | texto (5) | | Primeros 5 dígitos del código postal |
+| `customer_city` | texto | | Ciudad (escrita de formas distintas, hallazgo 12) |
+| `customer_state` | texto (2) | | Estado de Brasil (SP, RJ…) |
+
+Ejemplo: una persona que compró 3 veces aparece en 3 filas, con el mismo `customer_unique_id` y 3 `customer_id` distintos.
+
+#### 6. `olist_products_dataset.csv` — productos
+Grano: 1 fila = 1 producto · Llave: `product_id` · Vista: `v_products`
+
+| Columna | Tipo | Llave | Qué es |
+|---|---|---|---|
+| `product_id` | texto (32) | PK | Identificador del producto |
+| `product_category_name` | texto | FK → category_translation | Categoría en portugués (puede venir nula) |
+| `product_name_lenght` | entero | | Largo del nombre en caracteres (error de ortografía del origen; se descarta) |
+| `product_description_lenght` | entero | | Largo de la descripción en caracteres (se descarta) |
+| `product_photos_qty` | entero | | Número de fotos publicadas |
+| `product_weight_g` | entero | | Peso en gramos |
+| `product_length_cm` | entero | | Largo en cm |
+| `product_height_cm` | entero | | Alto en cm |
+| `product_width_cm` | entero | | Ancho en cm |
+
+No hay nombre del producto: solo su categoría y medidas.
+
+#### 7. `olist_sellers_dataset.csv` — vendedores
+Grano: 1 fila = 1 vendedor · Llave: `seller_id` · Vista: `v_sellers`
+
+| Columna | Tipo | Llave | Qué es |
+|---|---|---|---|
+| `seller_id` | texto (32) | PK | Identificador del vendedor |
+| `seller_zip_code_prefix` | texto (5) | | Primeros 5 dígitos del código postal |
+| `seller_city` | texto | | Ciudad |
+| `seller_state` | texto (2) | | Estado de Brasil |
+
+#### 8. `product_category_name_translation.csv` — traducción de categorías
+Grano: 1 fila = 1 categoría (no 1 producto) · Llave: `product_category_name` · Vista: `v_category_translation`
+
+| Columna | Tipo | Llave | Qué es |
+|---|---|---|---|
+| `product_category_name` | texto | PK | Categoría en **portugués** (ej. `beleza_saude`) |
+| `product_category_name_english` | texto | | Categoría en **inglés** (ej. `health_beauty`) |
+
+~71 categorías para ~33 mil productos: muchos productos comparten categoría. No incluye español (sería un enriquecimiento propio).
+
+#### 9. `olist_geolocation_dataset.csv` — geolocalización (fuera de alcance v1)
+Grano: 1 fila = 1 punto de un código postal · Llave: ninguna (muchos duplicados)
+
+| Columna | Tipo | Llave | Qué es |
+|---|---|---|---|
+| `geolocation_zip_code_prefix` | texto (5) | | Primeros 5 dígitos del código postal (se repite cientos de veces) |
+| `geolocation_lat` | decimal | | Latitud |
+| `geolocation_lng` | decimal | | Longitud |
+| `geolocation_city` | texto | | Ciudad |
+| `geolocation_state` | texto (2) | | Estado de Brasil |
+
+### De qué CSV sale cada tabla del modelo
+
+| Tabla del modelo | Se construye con | Vistas de perfilamiento |
+|---|---|---|
+| `fact_ventas` | order_items + orders + customers | `v_order_items`, `v_orders`, `v_customers` |
+| `fact_pagos` | payments + orders + customers | `v_payments`, `v_orders`, `v_customers` |
+| `dim_fecha` | Se genera (sin CSV) | — |
+| `dim_cliente` | customers + orders | `v_customers`, `v_orders` |
+| `dim_ubicacion` | customers ∪ sellers | `v_customers`, `v_sellers` |
+| `dim_producto` | products + category_translation | `v_products`, `v_category_translation` |
+| `dim_vendedor` | sellers | `v_sellers` |
+| `dim_medio_pago` | Tabla fija (se valida contra payments) | `v_payments` |
+| `dim_estado_pedido` | Tabla fija (se valida contra orders) | `v_orders` |
 
 ### Modelo de origen
 
@@ -112,6 +243,7 @@ erDiagram
 | D17 | **Reseñas y geolocalización fuera de alcance (v1)** | No responden las preguntas actuales; geolocalización requiere deduplicación previa. |
 | D18 | **`dim_fecha` como dimensión de rol** en `fact_ventas` (compra y entrega) | Permite analizar tanto "cuánto se vendió por mes" (fecha de compra) como "cuánto se entregó por mes" (fecha de entrega). Si el pedido no fue entregado, `sk_fecha_entrega` apunta al miembro desconocido (-1). |
 | D19 | **Ciudad, estado y región también en `dim_vendedor`** (además de `sk_ubicacion_vendedor` en el hecho) | Simplifica las consultas centradas en vendedores (por ejemplo, "¿cuántos vendedores hay por estado?") sin pasar por la tabla de hechos. Además hace el diseño robusto: en este dataset todos los vendedores tienen al menos una venta (a confirmar en el perfilamiento), pero en un sistema real un vendedor recién registrado no tendría ubicación si esta solo llegara a través de `fact_ventas`. La redundancia es aceptable en un modelo estrella (desnormalización). |
+| D20 | **Synapse y Azure SQL Database en Canada Central**; storage, Key Vault y Data Factory en East US | La suscripción de prueba gratuita no permite crear servidores SQL en East US, East US 2 ni West US (error `SqlServerRegionDoesNotAllowProvisioning`), y las cuentas gratuitas no pueden solicitar acceso a regiones. Canada Central sí lo permite. Con ~120 MB de datos, el costo y la latencia de cruzar regiones son despreciables. |
 
 ---
 
