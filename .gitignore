@@ -2,6 +2,8 @@
 data/
 *.csv
 *.zip
+# Excepción: tablas de referencia propias (pequeñas, versionadas a propósito)
+!referencia/*.csv
 
 # Secretos y credenciales: NUNCA al repositorio
 .env
