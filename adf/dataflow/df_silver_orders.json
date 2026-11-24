@@ -9,11 +9,44 @@
 						"referenceName": "ds_bronze_csv",
 						"type": "DatasetReference"
 					},
-					"name": "srcOrders"
+					"name": "srcOrders",
+					"description": "Lee olist_orders_dataset.csv de bronze. Tipos declarados (R1): 5 fechas como timestamp yyyy-MM-dd HH:mm:ss. Base de fact_ventas."
 				}
 			],
-			"sinks": [],
-			"transformations": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_silver_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "sinkOrders",
+					"description": "Escribe orders limpio en silver/olist/orders/ (Parquet snappy). Origen de fact_ventas en oro."
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_silver_rechazados",
+						"type": "DatasetReference"
+					},
+					"name": "sinkRechazosOrders"
+				}
+			],
+			"transformations": [
+				{
+					"name": "limpiarOrders",
+					"description": "Limpieza defensiva: trim a order_id y customer_id (joins con order_items y dim_cliente), lower+trim a order_status. Agrega fecha_carga para linaje."
+				},
+				{
+					"name": "validarOrders",
+					"description": "Cuarentena: rechaza pedidos sin order_id, sin customer_id, sin fecha de compra (sin sk_fecha_compra) o con estado fuera de los 8 conocidos."
+				},
+				{
+					"name": "dedupOrders",
+					"description": "Garantiza una fila por order_id (grano de orders en plata). Evita duplicar ventas en fact_ventas."
+				},
+				{
+					"name": "motivoOrders"
+				}
+			],
 			"scriptLines": [
 				"source(output(",
 				"          order_id as string,",
@@ -27,7 +60,37 @@
 				"     ),",
 				"     allowSchemaDrift: false,",
 				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false) ~> srcOrders"
+				"     ignoreNoFilesFound: false) ~> srcOrders",
+				"srcOrders derive(order_id = trim(order_id),",
+				"          customer_id = trim(customer_id),",
+				"          order_status = lower(trim(order_status)),",
+				"          fecha_carga = currentTimestamp()) ~> limpiarOrders",
+				"limpiarOrders split(isNull(order_id) || order_id == '' ||\r",
+				"isNull(customer_id) || customer_id == '' ||\r",
+				"isNull(order_purchase_timestamp) ||\r",
+				"!in(['delivered','shipped','canceled','unavailable','invoiced','processing','created','approved'], order_status)    ,",
+				"     disjoint: false) ~> validarOrders@(rechazados, validos)",
+				"validarOrders@validos aggregate(groupBy(order_id),",
+				"     each(match(name != 'order_id'), $$ = first($$))) ~> dedupOrders",
+				"validarOrders@rechazados derive(motivo_rechazo = case(   isNull(order_id) || order_id == '', 'sin_order_id',   isNull(customer_id) || customer_id == '', 'sin_customer_id',   isNull(order_purchase_timestamp), 'sin_fecha_compra',   'estado_desconocido' )) ~> motivoOrders",
+				"dedupOrders sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     truncate: true,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkOrders",
+				"motivoOrders sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     truncate: true,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkRechazosOrders"
 			]
 		}
 	}

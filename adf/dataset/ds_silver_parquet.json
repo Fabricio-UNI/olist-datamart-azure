@@ -1,5 +1,5 @@
 {
-	"name": "Parquet1",
+	"name": "ds_silver_parquet",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "ls_adls_olist",
@@ -15,7 +15,10 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"folderPath": "@concat('olist/', dataset().tabla)",
+				"folderPath": {
+					"value": "@concat('olist/', dataset().tabla)",
+					"type": "Expression"
+				},
 				"fileSystem": "silver"
 			},
 			"compressionCodec": "snappy"

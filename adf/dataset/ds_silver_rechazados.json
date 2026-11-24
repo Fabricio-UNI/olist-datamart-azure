@@ -1,0 +1,28 @@
+{
+	"name": "ds_silver_rechazados",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_adls_olist",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"tabla": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": {
+					"value": "@concat('_rechazados/', dataset().tabla)",
+					"type": "Expression"
+				},
+				"fileSystem": "silver"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	}
+}
