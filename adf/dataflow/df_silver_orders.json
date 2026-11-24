@@ -15,7 +15,17 @@
 			"sinks": [],
 			"transformations": [],
 			"scriptLines": [
-				"source(allowSchemaDrift: false,",
+				"source(output(",
+				"          order_id as string,",
+				"          customer_id as string,",
+				"          order_status as string,",
+				"          order_purchase_timestamp as timestamp 'yyyy-MM-dd HH:mm:ss',",
+				"          order_approved_at as timestamp 'yyyy-MM-dd HH:mm:ss',",
+				"          order_delivered_carrier_date as timestamp 'yyyy-MM-dd HH:mm:ss',",
+				"          order_delivered_customer_date as timestamp 'yyyy-MM-dd HH:mm:ss',",
+				"          order_estimated_delivery_date as timestamp 'yyyy-MM-dd HH:mm:ss'",
+				"     ),",
+				"     allowSchemaDrift: false,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> srcOrders"
 			]
