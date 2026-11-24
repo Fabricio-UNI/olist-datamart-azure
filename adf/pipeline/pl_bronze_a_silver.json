@@ -1,0 +1,44 @@
+{
+	"name": "pl_bronze_a_silver",
+	"properties": {
+		"description": "Orquesta bronce → plata: un flujo de datos por tabla de Olist, más el notebook de ciudades.",
+		"activities": [
+			{
+				"name": "Silver Order",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "df_silver_orders",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"srcOrders": {
+								"nombre_archivo": "olist_orders_dataset.csv"
+							},
+							"sinkOrders": {
+								"tabla": "orders"
+							},
+							"sinkRechazosOrders": {
+								"tabla": "orders"
+							}
+						}
+					},
+					"integrationRuntime": {
+						"referenceName": "ir-dataflows",
+						"type": "IntegrationRuntimeReference"
+					},
+					"traceLevel": "Coarse"
+				}
+			}
+		],
+		"annotations": []
+	}
+}
