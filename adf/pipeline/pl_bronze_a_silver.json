@@ -4,7 +4,7 @@
 		"description": "Orquesta bronce → plata: un flujo de datos por tabla de Olist, más el notebook de ciudades.",
 		"activities": [
 			{
-				"name": "Silver Order",
+				"name": "Silver Orders",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
