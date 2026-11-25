@@ -118,7 +118,7 @@
 				}
 			},
 			{
-				"name": "df_silver_category_translation",
+				"name": "Silver Category Translation",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
