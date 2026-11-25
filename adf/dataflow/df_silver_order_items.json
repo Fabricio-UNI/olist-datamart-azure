@@ -20,6 +20,13 @@
 						"type": "DatasetReference"
 					},
 					"name": "sinkOrderItems"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_silver_rechazados",
+						"type": "DatasetReference"
+					},
+					"name": "sinkRechazosOrderItems"
 				}
 			],
 			"transformations": [
@@ -68,7 +75,16 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sinkOrderItems"
+				"     skipDuplicateMapOutputs: true) ~> sinkOrderItems",
+				"motivoOrderItems sink(allowSchemaDrift: false,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     truncate: true,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkRechazosOrderItems"
 			]
 		}
 	}
