@@ -248,8 +248,10 @@ erDiagram
 | D21 | **Tabla de corrección de traducciones** (`referencia/correccion_traduccion_categorias.csv`) | El perfilamiento encontró solo 2 categorías sin traducción (`portateis_cozinha_e_preparadores_de_alimentos`, 10 productos; `pc_gamer`, 3 productos). Como la traducción correcta es conocida, se corrige de forma trazable con una tabla versionada en Git en vez de dejarlas como `sin_traduccion`. D14 se mantiene como red de seguridad para categorías nuevas. |
 | D22 | **Peso 0 gramos → NULL** en `dim_producto` | El perfilamiento encontró 4 productos con `product_weight_g = 0`. Un producto físico no puede pesar 0 g: es un dato faltante disfrazado de número. Si se dejara en 0, bajaría cualquier promedio de peso con un valor falso (misma lógica que D16). A diferencia del flete 0, que sí es válido (envío gratis). |
 | D23 | **Un pedido sin pago no se completa con un pago estimado**; la conciliación exige pagado ≥ vendido | El perfilamiento encontró 1 pedido `delivered` sin pagos. El monto podría estimarse sumando sus ítems, pero el medio de pago y las cuotas no, y cada pago real ya tiene su propio valor. En los hechos solo van datos reales; el pedido aparece en la conciliación. Regla: lo pagado debe ser igual o mayor a lo vendido (intereses por cuotas); si es menor o no hay pago, se reporta como alerta. |
-| D24 | **Tratamiento de inconsistencias puntuales de orders y payments** | (1) 8 pedidos `delivered` sin fecha de entrega: se conservan, con `dias_entrega` NULL y `sk_fecha_entrega = -1`, porque son ventas reales. (2) 6 pedidos `canceled` con fecha de entrega: manda el estado; la fecha sobrante no se usa. (3) 2 pagos con tarjeta en 0 cuotas: se convierten a NULL, porque el mínimo es 1 cuota y no se supone un valor (misma lógica que D16 y D22). Todos se reportan en el registro de calidad. |
-| D25 | **"Pedido" en el modelo = pedido con al menos un ítem**; los pedidos sin ítems no se inventan en `fact_ventas` | La verificación de plata encontró 775 pedidos sin ítems (H-O10): unavailable 603, canceled 164, created 5, invoiced 2, shipped 1. Como el grano de `fact_ventas` es el ítem, no generan filas y el modelo cuenta 98,666 pedidos (no 99,441). No se crean filas con importe 0 (sería inventar datos, misma lógica que D23). Alternativa evaluada y descartada: agregar las 775 filas con un indicador `tiene_items = 0` y filtrarlas en cada medida; funciona, pero rompe el grano (no son ítems vendidos) y obliga a que cada medida y cada usuario recuerden el filtro (ítems, precio promedio y ticket promedio saldrían mal sin él). La medida se llama **"Pedidos con venta"** y la diferencia se documenta en las reglas de uso. Ninguna tabla del modelo contiene los 99,441: analizar todos los pedidos requeriría un hecho a nivel de pedido (mejora futura). |
+| D24 | **Tratamiento de inconsistencias puntuales de orders y payments** | (1) 8 pedidos `delivered` sin fecha de entrega: se conservan, con `dias_entrega` NULL (en `fact_pedidos`, D27) y `sk_fecha_entrega = -1`, porque son ventas reales. (2) 6 pedidos `canceled` con fecha de entrega: manda el estado; la fecha sobrante no se usa. (3) 2 pagos con tarjeta en 0 cuotas: se convierten a NULL, porque el mínimo es 1 cuota y no se supone un valor (misma lógica que D16 y D22). Todos se reportan en el registro de calidad. |
+| D25 | **"Pedido" en el modelo = pedido con al menos un ítem**; los pedidos sin ítems no se inventan en `fact_ventas` | La verificación de plata encontró 775 pedidos sin ítems (H-O10): unavailable 603, canceled 164, created 5, invoiced 2, shipped 1. Como el grano de `fact_ventas` es el ítem, no generan filas y el modelo cuenta 98,666 pedidos (no 99,441). No se crean filas con importe 0 (sería inventar datos, misma lógica que D23). Alternativa evaluada y descartada: agregar las 775 filas con un indicador `tiene_items = 0` y filtrarlas en cada medida; funciona, pero rompe el grano (no son ítems vendidos) y obliga a que cada medida y cada usuario recuerden el filtro (ítems, precio promedio y ticket promedio saldrían mal sin él). La medida se llama **"Pedidos con venta"** y la diferencia se documenta en las reglas de uso. Ninguna tabla del modelo contiene los 99,441: para analizar todos los pedidos se agrega `fact_pedidos` (D26). |
+| D26 | **Tercer hecho: `fact_pedidos` (snapshot acumulativo, 1 fila = 1 pedido)** | Ningún hecho existente contiene los 99,441 pedidos: `fact_ventas` tiene 98,666 (D25) y `fact_pagos` 99,440 (D23). `fact_pedidos` guarda cada pedido una vez, con sus hitos de fecha (compra, aprobación, despacho, entrega, estimada), los tiempos entre hitos, `cant_items`, `tiene_items`, `tiene_pago` y el monto pagado del pedido. Responde "¿cuántos pedidos hubo?" y "¿qué % se quedó sin productos?" sin filtros especiales, y da la base de la conciliación R12 (pagado ≥ vendido). Comparte `dim_fecha`, `dim_cliente`, `dim_ubicacion` y `dim_estado_pedido` (dimensiones conformadas). |
+| D27 | **Cada medida en el grano donde ocurre**: montos de producto en `fact_ventas`, tiempos de entrega en `fact_pedidos` | (1) `precio` y `flete` son de cada producto: viven solo en `fact_ventas`. Guardarlos sumados en `fact_pedidos` duplicaría el dato. (2) Las fechas de entrega son del pedido (todos sus ítems llegan el mismo día). En `fact_ventas` el retraso se repetiría en cada ítem y `AVG(entrega_tardia)` ponderaría por cantidad de productos (ej.: 1 pedido tarde con 3 ítems y 1 a tiempo con 1 ítem → 75% en vez de 50%). Por eso `dias_entrega`, `dias_retraso` y `entrega_tardia` se miden solo en `fact_pedidos`. (3) Categoría, producto y vendedor no pueden ir en `fact_pedidos`: un pedido puede tener varios; por eso `fact_ventas` sigue siendo necesaria. (4) La conciliación R12 se hace con una vista que agrega `fact_ventas` por pedido. |
 
 ---
 
@@ -259,8 +261,9 @@ erDiagram
 |---|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | `fact_ventas` | 1 ítem de un pedido | ✅ ×2 (compra y entrega) | ✅ | ✅ ×2 (cliente y vendedor) | ✅ | ✅ | — | ✅ |
 | `fact_pagos` | 1 pago | ✅ | ✅ | ✅ | — | — | ✅ | — |
+| `fact_pedidos` | 1 pedido | ✅ ×5 (compra, aprobación, despacho, entrega, estimada) | ✅ | ✅ | — | — | — | ✅ |
 
-**Dimensiones conformadas** (compartidas): `dim_fecha`, `dim_cliente`, `dim_ubicacion`. Permiten analizar ventas y pagos juntos en el mismo dashboard.
+**Dimensiones conformadas** (compartidas): `dim_fecha`, `dim_cliente`, `dim_ubicacion`. Permiten analizar ventas, pagos y pedidos juntos en el mismo dashboard. `dim_estado_pedido` es conformada entre `fact_ventas` y `fact_pedidos`.
 
 ```mermaid
 erDiagram
@@ -274,6 +277,10 @@ erDiagram
   DIM_CLIENTE ||--o{ FACT_PAGOS : "sk_cliente"
   DIM_UBICACION ||--o{ FACT_PAGOS : "sk_ubicacion_cliente"
   DIM_MEDIO_PAGO ||--o{ FACT_PAGOS : "sk_medio_pago"
+  DIM_FECHA ||--o{ FACT_PEDIDOS : "5 roles de fecha"
+  DIM_CLIENTE ||--o{ FACT_PEDIDOS : "sk_cliente"
+  DIM_UBICACION ||--o{ FACT_PEDIDOS : "sk_ubicacion_cliente"
+  DIM_ESTADO_PEDIDO ||--o{ FACT_PEDIDOS : "sk_estado_pedido"
 ```
 
 ---
@@ -419,12 +426,10 @@ Una fila = un ítem de un pedido · Fuente: `order_items` + JOIN `orders` + JOIN
 | `sk_estado_pedido` | INT | → `dim_estado_pedido` |
 | `precio` | DECIMAL(10,2) | Hecho aditivo |
 | `flete` | DECIMAL(10,2) | Hecho aditivo |
-| `dias_entrega` | INT, nulo | No aditivo: entrega al cliente − compra |
-| `dias_retraso` | INT, nulo | No aditivo: entrega al cliente − fecha estimada (positivo = tarde) |
-| `entrega_tardia` | TINYINT, nulo | Aditivo (contador): 1 si `dias_retraso` > 0 |
 | `fecha_carga` | DATETIME2 | Auditoría |
 
-Medidas calculadas (no se guardan): unidades = `COUNT(*)`, pedidos = `COUNT(DISTINCT order_id)`, % entregas tardías = `AVG(entrega_tardia)`.
+Medidas calculadas (no se guardan): unidades = `COUNT(*)`, pedidos con venta = `COUNT(DISTINCT order_id)` (D25).
+Los tiempos de entrega **no** están aquí: son del pedido y se miden en `fact_pedidos` (D27). `sk_fecha_entrega` se mantiene como llave para analizar ventas por fecha de entrega.
 
 #### `fact_pagos`
 Una fila = un pago · Fuente: `payments` + JOIN `orders` + JOIN `customers`.
@@ -444,16 +449,46 @@ Una fila = un pago · Fuente: `payments` + JOIN `orders` + JOIN `customers`.
 
 Medidas calculadas: cantidad de pagos = `COUNT(*)`, valor por cuota = `monto_pago / cuotas` (en Power BI).
 
+#### `fact_pedidos`
+Una fila = un pedido (99,441) · Tipo Kimball: *snapshot* acumulativo · Fuente: `orders` + JOIN `customers` + resumen de `order_items` y `payments` por `order_id` (LEFT JOIN: los pedidos sin ítems o sin pago se conservan).
+
+| Columna | Tipo | Rol |
+|---|---|---|
+| `order_id` | VARCHAR(32) | Dimensión degenerada · PK |
+| `sk_fecha_compra` | INT | → `dim_fecha` (rol: compra) |
+| `sk_fecha_aprobacion` | INT | → `dim_fecha` (rol: aprobación; -1 si es nula) |
+| `sk_fecha_despacho` | INT | → `dim_fecha` (rol: entrega al transportista; -1 si es nula) |
+| `sk_fecha_entrega` | INT | → `dim_fecha` (rol: entrega al cliente; -1 si es nula o el pedido está cancelado, D24) |
+| `sk_fecha_estimada` | INT | → `dim_fecha` (rol: entrega estimada) |
+| `sk_cliente` | INT | → `dim_cliente` |
+| `sk_ubicacion_cliente` | INT | → `dim_ubicacion` (rol: destino) |
+| `sk_estado_pedido` | INT | → `dim_estado_pedido` |
+| `cant_items` | SMALLINT | Hecho aditivo (0 en los 775 pedidos sin ítems) |
+| `tiene_items` | BIT | Indicador: 1 = tiene al menos un ítem (D25) |
+| `tiene_pago` | BIT | Indicador: 1 = tiene al menos un pago (D23) |
+| `monto_pagado` | DECIMAL(10,2) | Hecho aditivo: suma de `payment_value` del pedido (0 si no tiene pago) |
+| `horas_aprobacion` | INT, nulo | No aditivo: aprobación − compra |
+| `dias_despacho` | INT, nulo | No aditivo: despacho − aprobación (puede salir negativo: inconsistencia del origen, ver H-O) |
+| `dias_entrega` | INT, nulo | No aditivo: entrega − compra |
+| `dias_retraso` | INT, nulo | No aditivo: entrega − estimada (positivo = tarde) |
+| `entrega_tardia` | TINYINT, nulo | Aditivo (contador): 1 si `dias_retraso` > 0 |
+| `fecha_carga` | DATETIME2 | Auditoría |
+
+Medidas calculadas: pedidos registrados = `COUNT(*)` (99,441), pedidos sin productos = `SUM(1 - tiene_items)`, % entregas tardías por pedido = `AVG(entrega_tardia)`.
+Conciliación R12: vista `v_conciliacion_pedidos` que suma `precio + flete` de `fact_ventas` por `order_id` y la compara con `monto_pagado` de `fact_pedidos`. Si lo pagado es menor o `tiene_pago = 0`, alerta de calidad. Así ningún monto se guarda dos veces (D27).
+
 ---
 
 ## 9. Reglas de uso del modelo
 
 - **No sumar montos de pago por producto:** un pago no está asignado a productos (D4). Para cruzar productos con medios de pago, filtrar un medio a la vez y sumar `precio` de `fact_ventas`.
 - **Contar pedidos con `COUNT(DISTINCT order_id)`**, nunca contando filas.
-- **"Pedidos con venta" ≠ pedidos registrados:** `fact_ventas` da 98,666 pedidos; el origen tiene 99,441. La diferencia son 775 pedidos sin ítems (D25). No presentar 98,666 como "total de pedidos".
+- **"Pedidos con venta" ≠ pedidos registrados:** `fact_ventas` da 98,666 pedidos; el origen tiene 99,441. La diferencia son 775 pedidos sin ítems (D25). No presentar 98,666 como "total de pedidos": el total (99,441) sale de `fact_pedidos` (D26).
 - **Filtrar por estado al medir ventas:** 461 pedidos `canceled` sí tienen ítems y entran a `fact_ventas`. Las medidas de venta deben excluir `canceled` y `unavailable` con `dim_estado_pedido`.
 - **Un pedido con productos de varias categorías cuenta en cada categoría:** los totales por categoría no se suman entre sí para obtener pedidos.
-- **Conciliación ventas vs. pagos:** agregar cada hecho a nivel de `order_id` antes de compararlos, nunca unirlos fila a fila.
+- **Conciliación ventas vs. pagos:** usar la vista `v_conciliacion_pedidos` (D27). Si se hace a mano, agregar cada hecho a nivel de `order_id` antes de compararlos, nunca unirlos fila a fila.
+- **% de entregas tardías siempre desde `fact_pedidos`:** medido por ítem se pondera por cantidad de productos y sale inflado (D27).
+- **Montos de venta siempre desde `fact_ventas`:** `fact_pedidos` solo guarda el monto pagado.
 
 ---
 
@@ -462,5 +497,4 @@ Medidas calculadas: cantidad de pagos = `COUNT(*)`, valor por cuota = `monto_pag
 - [ ] Confirmar conteos, nulos y duplicados con el **perfilamiento** de los datos reales.
 - [ ] Definir reglas de validación de plata (fechas incoherentes, nulos según estado, duplicados).
 - [ ] Evaluar `fact_resenas` (grano: 1 reseña) como tercer proceso.
-- [ ] Evaluar un hecho a nivel de pedido (*snapshot* acumulativo) para analizar los 99,441 pedidos, incluidos los 775 sin ítems (D25).
 - [ ] Evaluar el uso de `geolocation` (deduplicada) para mapas.

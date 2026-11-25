@@ -43,7 +43,7 @@ A cada tabla se le aplican las mismas revisiones, siempre pensando en qué parte
 | H-O3 | Estados | 8 estados, suman 99,441 | ✅ Coinciden con `dim_estado_pedido` |
 | H-O4 | Pedidos sin fecha de aprobación | 160 | `fact_pagos` usa la fecha de compra y marca `origen_fecha` (D12) |
 | H-O5 | Pedidos sin entrega a transportista / al cliente | 1,783 / 2,965 | Nulos esperados en pedidos no entregados (D16) |
-| H-O6 | **`delivered` sin fecha de entrega** | **8** | ⚠️ Error de datos. Se conservan: `dias_entrega` NULL y `sk_fecha_entrega = -1` (D24) |
+| H-O6 | **`delivered` sin fecha de entrega** | **8** | ⚠️ Error de datos. Se conservan: `dias_entrega` NULL en `fact_pedidos` y `sk_fecha_entrega = -1` (D24, D27) |
 | H-O7 | **`canceled` con fecha de entrega** (hallazgo nuevo) | **6** | ⚠️ Inconsistencia. Manda el estado; la fecha sobrante no se usa (D24). Consultar al negocio cómo registra devoluciones |
 | H-O8 | Entrega anterior a la compra | 0 | ✅ Sospecha descartada |
 | H-O9 | Integridad `orders` → `customers` | 0 pedidos sin cliente | ✅ (revisado en `07_customers.sql`) |
