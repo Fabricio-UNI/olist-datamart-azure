@@ -153,7 +153,7 @@ Lo que Data Factory tendrá que aplicar al pasar de bronce a plata:
 
 | # | Regla | Origen |
 |---|---|---|
-| R1 | Declarar los tipos de todas las columnas (dinero `DECIMAL(10,2)`, códigos postales `CHAR(5)`, fechas `DATETIME2`) | Sección 4 |
+| R1 | Declarar los tipos de todas las columnas (dinero `DECIMAL(10,2)`, códigos postales `CHAR(5)`, fechas `DATETIME2`). En ADF, el decimal necesita **precisión y escala**: si la escala queda vacía vale 0 y redondea a entero **sin error** (pasó en `payments` el 25/11: 9 → 100 pagos en 0 y +972.88 en el total). Revisar la pestaña Inspeccionar del origen | Sección 4 |
 | R2 | Ciudades: quitar espacios al inicio y final, pasar a minúsculas | H-S3 |
 | R3 | Ciudades: quitar tildes (`são` → `sao`) | H-S3 |
 | R4 | Ciudades: quitar el estado pegado **al final** (`- sp`, ` sp`, `/ sao paulo`) sin confundir la ciudad con el estado y sin romper ciudades reales como `sao paulo do potengi` o `morro de sao paulo` | H-S3, H-C8 |
