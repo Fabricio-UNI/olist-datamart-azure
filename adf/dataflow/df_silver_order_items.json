@@ -31,7 +31,7 @@
 			],
 			"transformations": [
 				{
-					"name": "derivedColumn1",
+					"name": "LimpiarOrderItems",
 					"description": "Limpieza defensiva: trim a las 3 llaves (joins con orders, dim_producto y dim_vendedor). Agrega fecha_carga para linaje."
 				},
 				{
@@ -62,8 +62,8 @@
 				"srcOrderItems derive(order_id = trim(order_id),",
 				"          product_id = trim(product_id),",
 				"          seller_id = trim(seller_id),",
-				"          fecha_carga = currentTimestamp()) ~> derivedColumn1",
-				"derivedColumn1 split(isNull(order_id) || order_id == '' || isNull(order_item_id) || order_item_id < 1 || isNull(product_id) || product_id == '' || isNull(seller_id) || seller_id == '' || isNull(price) || price <= 0 || isNull(freight_value) || freight_value < 0,",
+				"          fecha_carga = currentTimestamp()) ~> LimpiarOrderItems",
+				"LimpiarOrderItems split(isNull(order_id) || order_id == '' || isNull(order_item_id) || order_item_id < 1 || isNull(product_id) || product_id == '' || isNull(seller_id) || seller_id == '' || isNull(price) || price <= 0 || isNull(freight_value) || freight_value < 0,",
 				"     disjoint: false) ~> validarOrderItems@(rechazados, validos)",
 				"validarOrderItems@validos aggregate(groupBy(order_id,",
 				"          order_item_id),",

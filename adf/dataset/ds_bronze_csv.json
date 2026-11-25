@@ -8,6 +8,10 @@
 		"parameters": {
 			"nombre_archivo": {
 				"type": "string"
+			},
+			"carpeta": {
+				"type": "string",
+				"defaultValue": "olist"
 			}
 		},
 		"annotations": [],
@@ -15,8 +19,11 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "@dataset().nombre_archivo",
-				"folderPath": "olist",
+				"fileName": {
+					"value": "@dataset().nombre_archivo",
+					"type": "Expression"
+				},
+				"folderPath": "@dataset().carpeta",
 				"fileSystem": "bronze"
 			},
 			"columnDelimiter": ",",

@@ -1,0 +1,87 @@
+{
+	"name": "df_silver_payments",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_bronze_csv",
+						"type": "DatasetReference"
+					},
+					"name": "srcPayments"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_silver_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "sinkPayments"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_silver_rechazados",
+						"type": "DatasetReference"
+					},
+					"name": "sinkRechazosPayments"
+				}
+			],
+			"transformations": [
+				{
+					"name": "limpiarPayments"
+				},
+				{
+					"name": "validarPayments"
+				},
+				{
+					"name": "dedupPayments"
+				},
+				{
+					"name": "motivoPayments"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          order_id as string,",
+				"          payment_sequential as integer,",
+				"          payment_type as string,",
+				"          payment_installments as integer,",
+				"          payment_value as decimal(10,2)",
+				"     ),",
+				"     allowSchemaDrift: false,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> srcPayments",
+				"srcPayments derive(order_id = trim(order_id),",
+				"          payment_type = lower(trim(payment_type)),",
+				"          payment_installments = iif(payment_installments == 0, toInteger(null()), payment_installments),",
+				"          fecha_carga = currentTimestamp()) ~> limpiarPayments",
+				"limpiarPayments split(isNull(order_id) || order_id == '' || isNull(payment_sequential) || payment_sequential < 1 || !in(['credit_card','boleto','voucher','debit_card','not_defined'], payment_type) || isNull(payment_value) || payment_value < 0 || payment_installments < 0,",
+				"     disjoint: false) ~> validarPayments@(rechazados, validos)",
+				"validarPayments@validos aggregate(groupBy(order_id,",
+				"          payment_sequential),",
+				"     each(match(!in(['order_id','payment_sequential'],name)), $$ = first($$))) ~> dedupPayments",
+				"validarPayments@rechazados derive(motivo_rechazo = case(   isNull(order_id) || order_id == '' || isNull(payment_sequential) || payment_sequential < 1, 'llave_invalida',   !in(['credit_card','boleto','voucher','debit_card','not_defined'], payment_type), 'medio_desconocido',   isNull(payment_value) || payment_value < 0, 'monto_invalido',   'cuotas_invalidas' )) ~> motivoPayments",
+				"dedupPayments sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     truncate: true,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkPayments",
+				"motivoPayments sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     truncate: true,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkRechazosPayments"
+			]
+		}
+	}
+}

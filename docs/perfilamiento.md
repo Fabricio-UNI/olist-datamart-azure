@@ -80,6 +80,8 @@ Total vendido de referencia: **112,650 ítems · R$ 13,591,643.70**.
 |---|---|---|---|
 | H-T1 | Categorías repetidas | 0 | ✅ |
 | H-T2 | Traducciones vacías | 0 | ✅ |
+| H-T3 | **Traducciones con errores** (hallazgo en plata, 25/11) | 6: 5 tipeos (`costruction` ×2, `fashio`, `confort`, `craftmanship`) y 1 traducción incorrecta (`seguros` → `security`) | Corregidas en la tabla de corrección; la corrección tiene prioridad (D28) |
+| H-T4 | **Categorías con sufijo `_2`** (observación, 25/11) | `casa_conforto` / `casa_conforto_2` · `eletrodomesticos` / `eletrodomesticos_2` | ℹ️ No son errores de tipeo: son códigos distintos en Olist, cada uno con sus productos. Parecen la misma categoría partida en dos, pero unirlas es una regla de negocio. **Se dejan separadas** y queda como pregunta abierta para el negocio |
 
 ### 3.5 `sellers` → `dim_vendedor`, `dim_ubicacion`
 

@@ -1,0 +1,114 @@
+{
+	"name": "df_silver_category_translation",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_bronze_csv",
+						"type": "DatasetReference"
+					},
+					"name": "srcTraduccion"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_bronze_csv",
+						"type": "DatasetReference"
+					},
+					"name": "srcCorreccion"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_silver_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "sinkTraducciones"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_silver_rechazados",
+						"type": "DatasetReference"
+					},
+					"name": "sinkRechazosTraducciones"
+				}
+			],
+			"transformations": [
+				{
+					"name": "marcarOlist"
+				},
+				{
+					"name": "marcarCorreccion"
+				},
+				{
+					"name": "unirTraducciones"
+				},
+				{
+					"name": "limpiarTraducciones"
+				},
+				{
+					"name": "validarTraducciones"
+				},
+				{
+					"name": "dedupTraducciones"
+				},
+				{
+					"name": "motivoTraducciones"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          product_category_name as string,",
+				"          product_category_name_english as string",
+				"     ),",
+				"     allowSchemaDrift: false,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> srcTraduccion",
+				"source(output(",
+				"          product_category_name as string,",
+				"          product_category_name_english as string,",
+				"          motivo as string,",
+				"          fecha_correccion as date",
+				"     ),",
+				"     allowSchemaDrift: false,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> srcCorreccion",
+				"srcTraduccion derive(origen = 'olist') ~> marcarOlist",
+				"srcCorreccion derive(origen = 'correccion') ~> marcarCorreccion",
+				"marcarOlist, marcarCorreccion union(byName: true)~> unirTraducciones",
+				"unirTraducciones derive(product_category_name = lower(trim(product_category_name)),",
+				"          product_category_name_english = lower(trim(product_category_name_english)),",
+				"          fecha_carga = currentTimestamp()) ~> limpiarTraducciones",
+				"limpiarTraducciones split(isNull(product_category_name) || product_category_name == '' || isNull(product_category_name_english) || product_category_name_english == '',",
+				"     disjoint: false) ~> validarTraducciones@(rechazados, validos)",
+				"validarTraducciones@validos aggregate(groupBy(product_category_name),",
+				"     product_category_name_english = coalesce(max(iif(origen == 'correccion', product_category_name_english, toString(null()))), max(product_category_name_english)),",
+				"          origen = iif(max(iif(origen == 'correccion', 1, 0)) == 1, 'correccion', 'olist'),",
+				"          motivo = max(motivo),",
+				"          fecha_correccion = max(fecha_correccion),",
+				"          fecha_carga = max(fecha_carga)) ~> dedupTraducciones",
+				"validarTraducciones@rechazados derive(motivo_rechazo = iif(isNull(product_category_name) || product_category_name == '', 'sin_categoria_pt', 'sin_traduccion')) ~> motivoTraducciones",
+				"dedupTraducciones sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     truncate: true,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkTraducciones",
+				"motivoTraducciones sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     truncate: true,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkRechazosTraducciones"
+			]
+		}
+	}
+}
