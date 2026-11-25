@@ -66,9 +66,44 @@
 							}
 						}
 					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
+					"integrationRuntime": {
+						"referenceName": "ir-dataflows",
+						"type": "IntegrationRuntimeReference"
+					},
+					"traceLevel": "Coarse"
+				}
+			},
+			{
+				"name": "Silver Payments",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "df_silver_payments",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"srcPayments": {
+								"nombre_archivo": "olist_order_payments_dataset.csv"
+							},
+							"sinkPayments": {
+								"tabla": "payments"
+							},
+							"sinkRechazosPayments": {
+								"tabla": "payments"
+							}
+						}
+					},
+					"integrationRuntime": {
+						"referenceName": "ir-dataflows",
+						"type": "IntegrationRuntimeReference"
 					},
 					"traceLevel": "Coarse"
 				}
