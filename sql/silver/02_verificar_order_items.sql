@@ -56,6 +56,8 @@ ORDER BY pedidos_sin_items DESC;
 -- 6) ¿Por qué fact_ventas es necesaria? (D27)
 --    Si hay pedidos con varios productos o vendedores, no se puede asignar
 --    UN producto/vendedor por pedido -> el grano de ventas tiene que ser el ítem.
+--    Resultado (24/11/2026): 98,666 pedidos con ítems · 9,803 con varios ítems ·
+--    3,236 con varios productos · 1,278 con varios vendedores (marketplace). Confirma D27.
 SELECT
     COUNT(*)                                          AS pedidos_con_items,
     SUM(CASE WHEN n_items > 1      THEN 1 ELSE 0 END) AS con_varios_items,
