@@ -1,0 +1,75 @@
+{
+	"name": "df_silver_order_items",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_bronze_csv",
+						"type": "DatasetReference"
+					},
+					"name": "srcOrderItems",
+					"description": "Lee olist_order_items_dataset.csv de bronze. Grano de fact_ventas (1 fila = 1 ítem). price y freight_value en decimal(10,2) (R1)."
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_silver_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "sinkOrderItems"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1",
+					"description": "Limpieza defensiva: trim a las 3 llaves (joins con orders, dim_producto y dim_vendedor). Agrega fecha_carga para linaje."
+				},
+				{
+					"name": "validarOrderItems",
+					"description": "Cuarentena: rechaza ítems sin llave, sin producto, sin vendedor, con precio <= 0 o flete negativo. Flete 0 es válido (R9, envío gratis)."
+				},
+				{
+					"name": "dedupOrderItems",
+					"description": "Una fila por order_id + order_item_id (grano de fact_ventas). Protege contra ventas duplicadas."
+				},
+				{
+					"name": "motivoOrderItems"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          order_id as string,",
+				"          order_item_id as integer,",
+				"          product_id as string,",
+				"          seller_id as string,",
+				"          shipping_limit_date as timestamp 'yyyy-MM-dd HH:mm:ss',",
+				"          price as decimal(10,2),",
+				"          freight_value as decimal(10,2)",
+				"     ),",
+				"     allowSchemaDrift: false,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> srcOrderItems",
+				"srcOrderItems derive(order_id = trim(order_id),",
+				"          product_id = trim(product_id),",
+				"          seller_id = trim(seller_id),",
+				"          fecha_carga = currentTimestamp()) ~> derivedColumn1",
+				"derivedColumn1 split(isNull(order_id) || order_id == '' || isNull(order_item_id) || order_item_id < 1 || isNull(product_id) || product_id == '' || isNull(seller_id) || seller_id == '' || isNull(price) || price <= 0 || isNull(freight_value) || freight_value < 0,",
+				"     disjoint: false) ~> validarOrderItems@(rechazados, validos)",
+				"validarOrderItems@validos aggregate(each(match(!in(['order_id','order_item_id'], name)), $$ = first($$))) ~> dedupOrderItems",
+				"validarOrderItems@rechazados derive(motivo_rechazo = case(   isNull(order_id) || order_id == '' || isNull(order_item_id) || order_item_id < 1, 'llave_invalida',   isNull(product_id) || product_id == '', 'sin_product_id',   isNull(seller_id) || seller_id == '', 'sin_seller_id',   isNull(price) || price <= 0, 'precio_invalido',   'flete_invalido' )) ~> motivoOrderItems",
+				"dedupOrderItems sink(allowSchemaDrift: false,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     truncate: true,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkOrderItems"
+			]
+		}
+	}
+}
