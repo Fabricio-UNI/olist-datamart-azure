@@ -1,0 +1,32 @@
+{
+	"name": "df_silver_payments",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_bronze_csv",
+						"type": "DatasetReference"
+					},
+					"name": "srcPayments"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "limpiarPayments"
+				}
+			],
+			"scriptLines": [
+				"source(allowSchemaDrift: false,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> srcPayments",
+				"srcPayments derive(order_id = trim(order_id),",
+				"          payment_type = lower(trim(payment_type)),",
+				"          payment_installments = iif(payment_installments == 0, toInteger(null()), payment_installments),",
+				"          fecha_carga = currentTimestamp()) ~> limpiarPayments"
+			]
+		}
+	}
+}
