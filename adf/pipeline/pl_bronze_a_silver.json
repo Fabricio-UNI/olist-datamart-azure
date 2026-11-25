@@ -120,6 +120,8 @@
 			{
 				"name": "Silver Category Translation",
 				"type": "ExecuteDataFlow",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -147,6 +149,42 @@
 							},
 							"sinkRechazosTraducciones": {
 								"tabla": "category_translation"
+							}
+						}
+					},
+					"integrationRuntime": {
+						"referenceName": "ir-dataflows",
+						"type": "IntegrationRuntimeReference"
+					},
+					"traceLevel": "Coarse"
+				}
+			},
+			{
+				"name": "Silver Products",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "df_silver_products",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"srcProducts": {
+								"nombre_archivo": "olist_products_dataset.csv",
+								"carpeta": "olist"
+							},
+							"sinkProducts": {
+								"tabla": "products"
+							},
+							"sinkRechazosProducts": {
+								"tabla": "products"
 							}
 						}
 					},
