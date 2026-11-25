@@ -34,6 +34,7 @@ SELECT
 FROM OPENROWSET(BULK 'order_items/*.parquet', DATA_SOURCE = 'silver_olist', FORMAT = 'PARQUET') AS r;
 
 -- 4) Integridad plata contra plata: todo ítem debe tener su pedido en silver/orders
+--    Resultado (24/11/2026): 0. Coincide con H-I5.
 SELECT COUNT(*) AS items_sin_pedido   -- esperado 0 (H-I5)
 FROM OPENROWSET(BULK 'order_items/*.parquet', DATA_SOURCE = 'silver_olist', FORMAT = 'PARQUET') AS i
 LEFT JOIN OPENROWSET(BULK 'orders/*.parquet', DATA_SOURCE = 'silver_olist', FORMAT = 'PARQUET') AS o
@@ -51,3 +52,20 @@ LEFT JOIN OPENROWSET(BULK 'order_items/*.parquet', DATA_SOURCE = 'silver_olist',
 WHERE i.order_id IS NULL
 GROUP BY o.order_status
 ORDER BY pedidos_sin_items DESC;
+
+-- 6) ¿Por qué fact_ventas es necesaria? (D27)
+--    Si hay pedidos con varios productos o vendedores, no se puede asignar
+--    UN producto/vendedor por pedido -> el grano de ventas tiene que ser el ítem.
+SELECT
+    COUNT(*)                                          AS pedidos_con_items,
+    SUM(CASE WHEN n_items > 1      THEN 1 ELSE 0 END) AS con_varios_items,
+    SUM(CASE WHEN n_productos > 1  THEN 1 ELSE 0 END) AS con_varios_productos,
+    SUM(CASE WHEN n_vendedores > 1 THEN 1 ELSE 0 END) AS con_varios_vendedores
+FROM (
+    SELECT order_id,
+           COUNT(*)                   AS n_items,
+           COUNT(DISTINCT product_id) AS n_productos,
+           COUNT(DISTINCT seller_id)  AS n_vendedores
+    FROM OPENROWSET(BULK 'order_items/*.parquet', DATA_SOURCE = 'silver_olist', FORMAT = 'PARQUET') AS r
+    GROUP BY order_id
+) t;
