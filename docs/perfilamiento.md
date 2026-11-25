@@ -47,6 +47,7 @@ A cada tabla se le aplican las mismas revisiones, siempre pensando en qué parte
 | H-O7 | **`canceled` con fecha de entrega** (hallazgo nuevo) | **6** | ⚠️ Inconsistencia. Manda el estado; la fecha sobrante no se usa (D24). Consultar al negocio cómo registra devoluciones |
 | H-O8 | Entrega anterior a la compra | 0 | ✅ Sospecha descartada |
 | H-O9 | Integridad `orders` → `customers` | 0 pedidos sin cliente | ✅ (revisado en `07_customers.sql`) |
+| H-O10 | **Pedidos sin ningún ítem** (hallazgo en plata, 24/11) | **775** = unavailable 603 · canceled 164 · created 5 · invoiced 2 · shipped 1 | ⚠️ No generan filas en `fact_ventas` (grano = ítem). Los 3 `invoiced`/`shipped` sin ítems son inconsistencia del origen. "Pedido" = pedido con ítems; medida "Pedidos con venta" (D25) |
 
 Cuadre que reveló H-O7: no entregados = 99,441 − 96,478 = **2,963**; sin fecha de entrega = **2,965** = 8 (H-O6) + 2,957. Faltaban 6.
 

@@ -217,6 +217,7 @@ erDiagram
 13. `geolocation` tiene muchos duplicados por código postal y no tiene llave.
 14. Los códigos postales son solo prefijos de 5 dígitos.
 15. No existe una tabla de "ventas" en el origen: es un concepto de negocio que se construye con `orders` + `order_items`.
+16. **775 pedidos no tienen ningún ítem** (H-O10, encontrado al cruzar plata). El estado lo explica casi siempre (`unavailable`, `canceled`), pero no es regla: 461 `canceled` sí tienen ítems y 3 pedidos `invoiced`/`shipped` no tienen ninguno.
 
 ---
 
@@ -248,6 +249,7 @@ erDiagram
 | D22 | **Peso 0 gramos → NULL** en `dim_producto` | El perfilamiento encontró 4 productos con `product_weight_g = 0`. Un producto físico no puede pesar 0 g: es un dato faltante disfrazado de número. Si se dejara en 0, bajaría cualquier promedio de peso con un valor falso (misma lógica que D16). A diferencia del flete 0, que sí es válido (envío gratis). |
 | D23 | **Un pedido sin pago no se completa con un pago estimado**; la conciliación exige pagado ≥ vendido | El perfilamiento encontró 1 pedido `delivered` sin pagos. El monto podría estimarse sumando sus ítems, pero el medio de pago y las cuotas no, y cada pago real ya tiene su propio valor. En los hechos solo van datos reales; el pedido aparece en la conciliación. Regla: lo pagado debe ser igual o mayor a lo vendido (intereses por cuotas); si es menor o no hay pago, se reporta como alerta. |
 | D24 | **Tratamiento de inconsistencias puntuales de orders y payments** | (1) 8 pedidos `delivered` sin fecha de entrega: se conservan, con `dias_entrega` NULL y `sk_fecha_entrega = -1`, porque son ventas reales. (2) 6 pedidos `canceled` con fecha de entrega: manda el estado; la fecha sobrante no se usa. (3) 2 pagos con tarjeta en 0 cuotas: se convierten a NULL, porque el mínimo es 1 cuota y no se supone un valor (misma lógica que D16 y D22). Todos se reportan en el registro de calidad. |
+| D25 | **"Pedido" en el modelo = pedido con al menos un ítem**; los pedidos sin ítems no se inventan en `fact_ventas` | La verificación de plata encontró 775 pedidos sin ítems (H-O10): unavailable 603, canceled 164, created 5, invoiced 2, shipped 1. Como el grano de `fact_ventas` es el ítem, no generan filas y el modelo cuenta 98,666 pedidos (no 99,441). No se crean filas con importe 0 (sería inventar datos, misma lógica que D23). Alternativa evaluada y descartada: agregar las 775 filas con un indicador `tiene_items = 0` y filtrarlas en cada medida; funciona, pero rompe el grano (no son ítems vendidos) y obliga a que cada medida y cada usuario recuerden el filtro (ítems, precio promedio y ticket promedio saldrían mal sin él). La medida se llama **"Pedidos con venta"** y la diferencia se documenta en las reglas de uso. Ninguna tabla del modelo contiene los 99,441: analizar todos los pedidos requeriría un hecho a nivel de pedido (mejora futura). |
 
 ---
 
@@ -448,6 +450,8 @@ Medidas calculadas: cantidad de pagos = `COUNT(*)`, valor por cuota = `monto_pag
 
 - **No sumar montos de pago por producto:** un pago no está asignado a productos (D4). Para cruzar productos con medios de pago, filtrar un medio a la vez y sumar `precio` de `fact_ventas`.
 - **Contar pedidos con `COUNT(DISTINCT order_id)`**, nunca contando filas.
+- **"Pedidos con venta" ≠ pedidos registrados:** `fact_ventas` da 98,666 pedidos; el origen tiene 99,441. La diferencia son 775 pedidos sin ítems (D25). No presentar 98,666 como "total de pedidos".
+- **Filtrar por estado al medir ventas:** 461 pedidos `canceled` sí tienen ítems y entran a `fact_ventas`. Las medidas de venta deben excluir `canceled` y `unavailable` con `dim_estado_pedido`.
 - **Un pedido con productos de varias categorías cuenta en cada categoría:** los totales por categoría no se suman entre sí para obtener pedidos.
 - **Conciliación ventas vs. pagos:** agregar cada hecho a nivel de `order_id` antes de compararlos, nunca unirlos fila a fila.
 
@@ -458,4 +462,5 @@ Medidas calculadas: cantidad de pagos = `COUNT(*)`, valor por cuota = `monto_pag
 - [ ] Confirmar conteos, nulos y duplicados con el **perfilamiento** de los datos reales.
 - [ ] Definir reglas de validación de plata (fechas incoherentes, nulos según estado, duplicados).
 - [ ] Evaluar `fact_resenas` (grano: 1 reseña) como tercer proceso.
+- [ ] Evaluar un hecho a nivel de pedido (*snapshot* acumulativo) para analizar los 99,441 pedidos, incluidos los 775 sin ítems (D25).
 - [ ] Evaluar el uso de `geolocation` (deduplicada) para mapas.
