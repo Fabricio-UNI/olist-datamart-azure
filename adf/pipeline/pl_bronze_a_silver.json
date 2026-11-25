@@ -6,6 +6,8 @@
 			{
 				"name": "Silver Orders",
 				"type": "ExecuteDataFlow",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -21,7 +23,8 @@
 						"type": "DataFlowReference",
 						"datasetParameters": {
 							"srcOrders": {
-								"nombre_archivo": "olist_orders_dataset.csv"
+								"nombre_archivo": "olist_orders_dataset.csv",
+								"carpeta": "olist"
 							},
 							"sinkOrders": {
 								"tabla": "orders"
@@ -41,6 +44,8 @@
 			{
 				"name": "Silver Order Items",
 				"type": "ExecuteDataFlow",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -56,7 +61,8 @@
 						"type": "DataFlowReference",
 						"datasetParameters": {
 							"srcOrderItems": {
-								"nombre_archivo": "olist_order_items_dataset.csv"
+								"nombre_archivo": "olist_order_items_dataset.csv",
+								"carpeta": "olist"
 							},
 							"sinkOrderItems": {
 								"tabla": "order_items"
@@ -76,6 +82,8 @@
 			{
 				"name": "Silver Payments",
 				"type": "ExecuteDataFlow",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -91,13 +99,54 @@
 						"type": "DataFlowReference",
 						"datasetParameters": {
 							"srcPayments": {
-								"nombre_archivo": "olist_order_payments_dataset.csv"
+								"nombre_archivo": "olist_order_payments_dataset.csv",
+								"carpeta": "olist"
 							},
 							"sinkPayments": {
 								"tabla": "payments"
 							},
 							"sinkRechazosPayments": {
 								"tabla": "payments"
+							}
+						}
+					},
+					"integrationRuntime": {
+						"referenceName": "ir-dataflows",
+						"type": "IntegrationRuntimeReference"
+					},
+					"traceLevel": "Coarse"
+				}
+			},
+			{
+				"name": "df_silver_category_translation",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "df_silver_category_translation",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"srcTraduccion": {
+								"nombre_archivo": "product_category_name_translation.csv",
+								"carpeta": "olist"
+							},
+							"srcCorreccion": {
+								"nombre_archivo": "correccion_traduccion_categorias.csv",
+								"carpeta": "referencia"
+							},
+							"sinkTraducciones": {
+								"tabla": "category_translation"
+							},
+							"sinkRechazosTraducciones": {
+								"tabla": "category_translation"
 							}
 						}
 					},
