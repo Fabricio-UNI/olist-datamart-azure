@@ -1,0 +1,93 @@
+{
+	"name": "df_silver_products",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_bronze_csv",
+						"type": "DatasetReference"
+					},
+					"name": "srcProducts"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_silver_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "sinkProducts"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_silver_rechazados",
+						"type": "DatasetReference"
+					},
+					"name": "sinkRechazosProducts"
+				}
+			],
+			"transformations": [
+				{
+					"name": "limpiarProducts"
+				},
+				{
+					"name": "validarProducts"
+				},
+				{
+					"name": "dedupProducts"
+				},
+				{
+					"name": "motivoProducts"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          product_id as string,",
+				"          product_category_name as string,",
+				"          product_name_lenght as integer,",
+				"          product_description_lenght as integer,",
+				"          product_photos_qty as integer,",
+				"          product_weight_g as integer,",
+				"          product_length_cm as integer,",
+				"          product_height_cm as integer,",
+				"          product_width_cm as integer",
+				"     ),",
+				"     allowSchemaDrift: false,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> srcProducts",
+				"srcProducts derive(product_id = trim(product_id),",
+				"          product_category_name = iif(isNull(product_category_name) || trim(product_category_name) == '', toString(null()), lower(trim(product_category_name))),",
+				"          product_weight_g = iif(product_weight_g == 0, toInteger(null()), toInteger(product_weight_g)),",
+				"          product_length_cm = iif(product_length_cm == 0, toInteger(null()), toInteger(product_length_cm)),",
+				"          product_height_cm = iif(product_height_cm == 0, toInteger(null()), toInteger(product_height_cm)),",
+				"          product_width_cm = iif(product_width_cm == 0, toInteger(null()), toInteger(product_width_cm)),",
+				"          fecha_carga = currentTimestamp()) ~> limpiarProducts",
+				"limpiarProducts split(isNull(product_id) || product_id == '' || product_weight_g < 0 || product_photos_qty < 0 || product_length_cm <= 0 || product_height_cm <= 0 || product_width_cm <= 0,",
+				"     disjoint: false) ~> validarProducts@(rechazados, validos)",
+				"validarProducts@validos aggregate(groupBy(product_id),",
+				"     each(match(name != 'product_id'), $$ = first($$))) ~> dedupProducts",
+				"validarProducts@rechazados derive(motivo_rechazo = iif(isNull(product_id) || product_id == '', 'sin_product_id', 'medida_invalida')) ~> motivoProducts",
+				"dedupProducts sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     truncate: true,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkProducts",
+				"motivoProducts sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     truncate: true,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkRechazosProducts"
+			]
+		}
+	}
+}
