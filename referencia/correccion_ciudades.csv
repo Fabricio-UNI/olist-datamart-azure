@@ -58,3 +58,42 @@ sertanopolis,SP,86170,sertanopolis,PR,sertanopolis,Ciudad correcta con estado in
 tocantins,SP,36512,tocantins,MG,tocantins,Ciudad correcta con estado incorrecto (SP en vez de MG),CP 36512: 6 de 6 clientes vecinos en tocantins (MG),2026-11-26
 vila velha,SP,29101,vila velha,ES,vila velha,Ciudad correcta con estado incorrecto (SP en vez de ES),CP 29101: 101 de 101 clientes vecinos en vila velha (ES),2026-11-26
 volta redonda,SP,27277,volta redonda,RJ,volta redonda,Ciudad correcta con estado incorrecto (SP en vez de RJ),CP 27277: 8 de 8 clientes vecinos en volta redonda (RJ),2026-11-26
+papucaia,RJ,28695,papucaia,RJ,cachoeiras de macacu,Localidad que no es municipio ni distrito del IBGE,CP 28695: 1 de 1 vecino en cachoeiras de macacu; el fuzzy (sapucaia) estaba mal,2026-11-26
+japuiba,RJ,28685,japuiba,RJ,cachoeiras de macacu,Localidad que no es municipio ni distrito del IBGE,CP 4 digitos 2868: 20 de 20 vecinos en cachoeiras de macacu,2026-11-26
+sao paluo,SP,08050,sao paulo,SP,sao paulo,Error de tipeo,CP 08050: 17 de 17 vecinos en sao paulo,2026-11-26
+catu de abrantes,BA,42841,catu de abrantes,BA,camacari,Localidad que no es municipio ni distrito del IBGE,CP 4 digitos 4284: 3 de 3 vecinos en camacari,2026-11-26
+jaua,BA,42843,jaua,BA,camacari,Localidad que no es municipio ni distrito del IBGE,CP 4 digitos 4284: 3 de 3 vecinos en camacari,2026-11-26
+carajas,PA,68516,carajas,PA,parauapebas,Localidad que no es municipio ni distrito del IBGE,CP 4 digitos 6851: 27 de 28 vecinos en parauapebas; el fuzzy (anajas) estaba mal,2026-11-26
+maioba,MA,65137,maioba,MA,paco do lumiar,Localidad que no es municipio ni distrito del IBGE,CP 4 digitos 6513: 7 de 7 vecinos en paco do lumiar; el fuzzy (jatoba) estaba mal,2026-11-26
+caldas do jorro,BA,48793,caldas do jorro,BA,tucano,Localidad que no es municipio ni distrito del IBGE,CP 4 digitos 4879: 8 de 8 vecinos en tucano,2026-11-26
+pau d'arco,AL,57319,pau d'arco,AL,arapiraca,Localidad que no es municipio ni distrito del IBGE,CP 4 digitos 5731: 13 de 13 vecinos en arapiraca,2026-11-26
+flores,CE,62903,flores,CE,russas,Nombre de distrito repetido en el estado (ambiguo),CP 4 digitos 6290: 9 de 9 vecinos en russas,2026-11-26
+campo alegre de minas,MG,35238,campo alegre de minas,MG,resplendor,Nombre de distrito repetido en el estado (ambiguo),CP 4 digitos 3523: 10 de 10 vecinos en resplendor,2026-11-26
+poco de pedra,RN,59299,poco de pedra,RN,sao goncalo do amarante,Localidad que no es municipio ni distrito del IBGE,CP 4 digitos 5929: 7 de 7 vecinos en sao goncalo do amarante,2026-11-26
+embu,SP,06846,embu das artes,SP,embu das artes,Nombre antiguo del municipio (hoy Embu das Artes),CP 4 digitos 0684: 16 de 16 vecinos en embu das artes,2026-11-26
+embu,SP,06844,embu das artes,SP,embu das artes,Nombre antiguo del municipio (hoy Embu das Artes),CP 4 digitos 0684: 16 de 16 vecinos en embu das artes,2026-11-26
+holambra ii,SP,18725,holambra ii,SP,paranapanema,Localidad que no es municipio ni distrito del IBGE,CP 4 digitos 1872: 11 de 11 vecinos en paranapanema,2026-11-26
+morro de sao paulo,BA,45428,morro de sao paulo,BA,cairu,Localidad que no es municipio ni distrito del IBGE,"CP 4 digitos 4542: 1 de 1 vecino en cairu (dudosa, aprobada en revision)",2026-11-26
+luziapolis,AL,57254,luziapolis,AL,campo alegre,Localidad que no es municipio ni distrito del IBGE,"CP 4 digitos 5725: 2 de 3 vecinos en campo alegre (dudosa, aprobada en revision)",2026-11-26
+barra do tarrachil,BA,48668,barra do tarrachil,BA,chorrocho,Localidad que no es municipio ni distrito del IBGE,"CP 4 digitos 4866: 1 de 1 vecino en chorrocho (dudosa, aprobada en revision)",2026-11-26
+primavera,SP,19274,primavera,SP,rosana,Localidad que no es municipio ni distrito del IBGE,"CP 4 digitos 1927: 4 de 6 vecinos en rosana (dudosa, aprobada en revision)",2026-11-26
+acu,RN,59650,assu,RN,assu,Variante del nombre oficial (Acu = Assu),Lista IBGE: municipio Assu (RN). El CP de 4 digitos sugeria areia branca: descartado,2026-11-26
+couto de magalhaes,TO,77750,couto magalhaes,TO,couto magalhaes,Variante del nombre oficial,Lista IBGE: municipio Couto Magalhaes (TO),2026-11-26
+bom jesus,GO,75570,bom jesus de goias,GO,bom jesus de goias,Nombre abreviado del municipio,Lista IBGE: Bom Jesus de Goias es el unico Bom Jesus de GO,2026-11-26
+nucleo residencial pilar,BA,48967,nucleo residencial pilar,BA,jaguarari,Localidad que no es municipio ni distrito del IBGE,Lista IBGE: distrito Pilar del municipio Jaguarari,2026-11-26
+santana do sobrado,BA,47310,santana do sobrado,BA,casa nova,Localidad que no es municipio ni distrito del IBGE,Lista IBGE: distrito Sobrado del municipio Casa Nova,2026-11-26
+vila muriqui,RJ,23870,vila muriqui,RJ,mangaratiba,Localidad que no es municipio ni distrito del IBGE,Lista IBGE: distrito Muriqui del municipio Mangaratiba,2026-11-26
+goitacazes,RJ,28110,campos dos goytacazes,RJ,campos dos goytacazes,Nombre abreviado del municipio,Lista IBGE: municipio Campos dos Goytacazes,2026-11-26
+polo petroquimico de triunfo,RS,95853,polo petroquimico de triunfo,RS,triunfo,Localidad que no es municipio ni distrito del IBGE,Lista IBGE: municipio Triunfo (RS),2026-11-26
+hidreletrica tucurui,PA,68464,hidreletrica tucurui,PA,tucurui,Localidad que no es municipio ni distrito del IBGE,Lista IBGE: municipio Tucurui (PA),2026-11-26
+pinheiros,SP,12770,pinheiros,SP,lavrinhas,Nombre de distrito repetido en el estado (ambiguo),Lista IBGE: distrito Pinheiros existe en Lavrinhas y en Sao Paulo; el CP 127xx no es de la capital,2026-11-26
+arembepe,BA,42835,arembepe,BA,camacari,Localidad que no es municipio ni distrito del IBGE,"Conocimiento general (sin respaldo en los datos), aprobado en revision",2026-11-26
+vila dos cabanos,PA,68447,vila dos cabanos,PA,barcarena,Localidad que no es municipio ni distrito del IBGE,"Conocimiento general (sin respaldo en los datos), aprobado en revision; el CP de 4 digitos sugeria abaetetuba (61%)",2026-11-26
+porto trombetas,PA,68275,porto trombetas,PA,oriximina,Localidad que no es municipio ni distrito del IBGE,"Conocimiento general (sin respaldo en los datos), aprobado en revision",2026-11-26
+ilha dos valadares,PR,83252,ilha dos valadares,PR,paranagua,Localidad que no es municipio ni distrito del IBGE,"Conocimiento general (sin respaldo en los datos), aprobado en revision; el CP de 4 digitos sugeria pontal do parana (89%)",2026-11-26
+penedo,RJ,27598,penedo,RJ,itatiaia,Localidad que no es municipio ni distrito del IBGE,"Conocimiento general (sin respaldo en los datos), aprobado en revision",2026-11-26
+jardim abc de goias,GO,72899,jardim abc de goias,GO,cidade ocidental,Localidad que no es municipio ni distrito del IBGE,"Conocimiento general (sin respaldo en los datos), aprobado en revision",2026-11-26
+colonia castrolanda,PR,84196,colonia castrolanda,PR,castro,Localidad que no es municipio ni distrito del IBGE,"Conocimiento general (sin respaldo en los datos), aprobado en revision",2026-11-26
+colonia jordaozinho,PR,85138,colonia jordaozinho,PR,guarapuava,Localidad que no es municipio ni distrito del IBGE,Zona de Entre Rios (distrito de Guarapuava segun IBGE); aprobado en revision,2026-11-26
+colonia vitoria,PR,85139,colonia vitoria,PR,guarapuava,Localidad que no es municipio ni distrito del IBGE,Zona de Entre Rios (distrito de Guarapuava segun IBGE); aprobado en revision,2026-11-26
+vitoria,PR,85139,colonia vitoria,PR,guarapuava,Nombre incompleto (Colonia Vitoria),Mismo CP que colonia vitoria; zona de Entre Rios (Guarapuava); el fuzzy (vitorino) estaba mal,2026-11-26
