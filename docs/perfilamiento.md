@@ -91,6 +91,9 @@ Total vendido de referencia: **112,650 ítems · R$ 13,591,643.70**.
 | H-S2 | **Código postal leído como número pierde el 0 a la izquierda** | **1,027 (33%)** | El CSV sí trae el cero: leer siempre como `CHAR(5)` |
 | H-S3 | **Ciudades escritas de varias formas** (hallazgo 12) | São Paulo en 7 variantes; otras ciudades con el estado pegado (`carapicuiba / sao paulo`) | Reglas de normalización (sección 5) |
 | H-S4 | Estados | 23 válidos, 2 letras en mayúscula · SP concentra el 60% | ✅ |
+| H-S5 | **Apóstrofos de varios tipos** (hallazgo en `nb_ciudades`, 26/11) | `santa barbara d´oeste` usa un acento agudo suelto (U+00B4) en vez de `'`. Al quitar tildes (NFKD) se convertía en espacio: `d oeste` | Unificar `´ \` ’ ‘` → `'` **antes** de quitar tildes (parte de R3, D29) |
+| H-S6 | **Ciudad correcta con el estado equivocado** (hallazgo en `nb_ciudades`, 26/11) | 32 combinaciones (ciudad, estado, CP); casi todas registradas como **SP** siendo de otro estado (`vila velha` → ES con 101 vecinos, `curitiba` → PR, `belo horizonte` → MG, `rio de janeiro` → RJ) | Corregidas en `correccion_ciudades.csv` con la evidencia del CP (D30). No calzaban con el IBGE porque se buscaba la ciudad en el estado equivocado |
+| H-S7 | **Fuzzy con falsos positivos** (26/11) | 4 de 49: `maioba`→jatoba, `carajas`→anajas, `vitoria`→vitorino (distancia 2 en nombres cortos) y `papucaia`→sapucaia (localidad real que no está en el IBGE). Además, el error de `vitoria` contaminó la evidencia del CP de `colonia vitoria` | Fuzzy con distancia 2 solo para nombres de 10+ letras; la evidencia del CP no usa vecinos resueltos por fuzzy (D31) |
 
 ### 3.6 `payments` → `fact_pagos`, `dim_medio_pago`
 

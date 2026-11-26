@@ -1,0 +1,60 @@
+ciudad_r4,estado,cp,ciudad_corregida,estado_corregido,municipio_corregido,motivo,evidencia,fecha_correccion
+sbc,SP,09726,sao bernardo do campo,SP,,Abreviatura de la ciudad (sbc/sp),CP 09726: 19 clientes en sao bernardo do campo,2026-11-26
+sp,SP,03363,sao paulo,SP,,Sigla del estado en lugar de la ciudad (sp / sp),CP 03363: 6 clientes en sao paulo,2026-11-26
+sp,SP,04776,sao paulo,SP,,Sigla del estado en lugar de la ciudad,CP 04776: 7 clientes en sao paulo,2026-11-26
+sp,SP,05141,sao paulo,SP,,Sigla del estado en lugar de la ciudad,CP 05141: 5 clientes en sao paulo,2026-11-26
+sp,SP,12903,braganca paulista,SP,,Sigla del estado en lugar de la ciudad,CP 12903: 13 clientes en braganca paulista,2026-11-26
+sp,SP,16021,aracatuba,SP,,Sigla del estado en lugar de la ciudad,CP 16021: 9 clientes en aracatuba,2026-11-26
+aguas claras df,SP,71900,brasilia,DF,,Region administrativa del DF escrita como ciudad; estado del registro incorrecto,CP 71900: 8 clientes en brasilia (DF),2026-11-26
+04482255,RJ,22790,rio de janeiro,RJ,,Codigo postal escrito en lugar de la ciudad,CP 22790: 142 clientes en rio de janeiro,2026-11-26
+vendas@creditparts.com.br,PR,87025,maringa,PR,,Correo escrito en lugar de la ciudad,CP 87025: 12 clientes en maringa,2026-11-26
+arraial d'ajuda (porto seguro),BA,45816,arraial d'ajuda,BA,,Distrito con el municipio entre parentesis (el municipio lo asigna D31),CP 45816: 8 clientes en arraial d'ajuda,2026-11-26
+embu,SP,06806,embu das artes,SP,embu das artes,Nombre antiguo del municipio (hoy Embu das Artes),CP 06806: 2 de 2 clientes vecinos en embu das artes (SP),2026-11-26
+londrina,SP,86076,londrina,PR,londrina,Ciudad correcta con estado incorrecto (SP en vez de PR),CP 86076: 2 de 2 clientes vecinos en londrina (PR),2026-11-26
+rio bonito,SP,28810,rio bonito,RJ,rio bonito,Ciudad correcta con estado incorrecto (SP en vez de RJ),CP 28810: 1 de 1 clientes vecinos en rio bonito (RJ),2026-11-26
+bahia,BA,48602,paulo afonso,BA,paulo afonso,Nombre del estado en lugar de la ciudad,CP 48602: 5 de 5 clientes vecinos en paulo afonso (BA),2026-11-26
+planaltina de goias,GO,73752,planaltina,GO,planaltina,Nombre no oficial del municipio (IBGE: Planaltina),CP 73752: 3 de 3 clientes vecinos en planaltina (GO),2026-11-26
+castro pires,MG,39801,castro pires,MG,teofilo otoni,Barrio o localidad que no es municipio ni distrito del IBGE,CP 39801: 17 de 17 clientes vecinos en teofilo otoni (MG),2026-11-26
+centro,MG,35660,para de minas,MG,para de minas,Nombre de barrio generico en lugar de la ciudad,CP 35660: 21 de 21 clientes vecinos en para de minas (MG),2026-11-26
+minas gerais,MG,37165,campo do meio,MG,campo do meio,Nombre del estado en lugar de la ciudad,CP 37165: 4 de 4 clientes vecinos en campo do meio (MG),2026-11-26
+marechal candido rondon,PA,85960,marechal candido rondon,PR,marechal candido rondon,Ciudad correcta con estado incorrecto (PA en vez de PR),CP 85960: 31 de 31 clientes vecinos en marechal candido rondon (PR),2026-11-26
+parana,PR,87083,maringa,PR,maringa,Nombre del estado en lugar de la ciudad,CP 87083: 14 de 14 clientes vecinos en maringa (PR),2026-11-26
+rio de janeiro,RN,21210,rio de janeiro,RJ,rio de janeiro,Ciudad correcta con estado incorrecto (RN en vez de RJ),CP 21210: 18 de 18 clientes vecinos en rio de janeiro (RJ),2026-11-26
+picarras,SC,88380,balneario picarras,SC,balneario picarras,Nombre abreviado del municipio (Balneario Picarras),CP 88380: 10 de 10 clientes vecinos en balneario picarras (SC),2026-11-26
+santa catarina,SC,88135,palhoca,SC,palhoca,Nombre del estado en lugar de la ciudad,CP 88135: 16 de 16 clientes vecinos en palhoca (SC),2026-11-26
+andradas,SP,37795,andradas,MG,andradas,Ciudad correcta con estado incorrecto (SP en vez de MG),CP 37795: 12 de 12 clientes vecinos en andradas (MG),2026-11-26
+belo horizonte,SP,31160,belo horizonte,MG,belo horizonte,Ciudad correcta con estado incorrecto (SP en vez de MG),CP 31160: 25 de 25 clientes vecinos en belo horizonte (MG),2026-11-26
+belo horizonte,SP,31570,belo horizonte,MG,belo horizonte,Ciudad correcta con estado incorrecto (SP en vez de MG),CP 31570: 4 de 4 clientes vecinos en belo horizonte (MG),2026-11-26
+blumenau,SP,89052,blumenau,SC,blumenau,Ciudad correcta con estado incorrecto (SP en vez de SC),CP 89052: 5 de 5 clientes vecinos en blumenau (SC),2026-11-26
+caxias do sul,SP,95055,caxias do sul,RS,caxias do sul,Ciudad correcta con estado incorrecto (SP en vez de RS),CP 95055: 3 de 3 clientes vecinos en caxias do sul (RS),2026-11-26
+caxias do sul,SP,95076,caxias do sul,RS,caxias do sul,Ciudad correcta con estado incorrecto (SP en vez de RS),CP 95076: 4 de 4 clientes vecinos en caxias do sul (RS),2026-11-26
+chapeco,SP,89803,chapeco,SC,chapeco,Ciudad correcta con estado incorrecto (SP en vez de SC),CP 89803: 11 de 11 clientes vecinos en chapeco (SC),2026-11-26
+curitiba,SP,81560,curitiba,PR,curitiba,Ciudad correcta con estado incorrecto (SP en vez de PR),CP 81560: 15 de 15 clientes vecinos en curitiba (PR),2026-11-26
+curitiba,SP,80240,curitiba,PR,curitiba,Ciudad correcta con estado incorrecto (SP en vez de PR),CP 80240: 44 de 44 clientes vecinos en curitiba (PR),2026-11-26
+curitiba,SP,81020,curitiba,PR,curitiba,Ciudad correcta con estado incorrecto (SP en vez de PR),CP 81020: 14 de 14 clientes vecinos en curitiba (PR),2026-11-26
+embu,SP,06813,embu das artes,SP,embu das artes,Nombre antiguo del municipio (hoy Embu das Artes),CP 06813: 12 de 12 clientes vecinos en embu das artes (SP),2026-11-26
+embu,SP,06823,embu das artes,SP,embu das artes,Nombre antiguo del municipio (hoy Embu das Artes),CP 06823: 19 de 19 clientes vecinos en embu das artes (SP),2026-11-26
+embu,SP,06824,embu das artes,SP,embu das artes,Nombre antiguo del municipio (hoy Embu das Artes),CP 06824: 9 de 9 clientes vecinos en embu das artes (SP),2026-11-26
+embu,SP,06826,embu das artes,SP,embu das artes,Nombre antiguo del municipio (hoy Embu das Artes),CP 06826: 15 de 15 clientes vecinos en embu das artes (SP),2026-11-26
+embu,SP,06810,embu das artes,SP,embu das artes,Nombre antiguo del municipio (hoy Embu das Artes),CP 06810: 13 de 13 clientes vecinos en embu das artes (SP),2026-11-26
+embu,SP,06835,embu das artes,SP,embu das artes,Nombre antiguo del municipio (hoy Embu das Artes),CP 06835: 3 de 3 clientes vecinos en embu das artes (SP),2026-11-26
+embu,SP,06814,embu das artes,SP,embu das artes,Nombre antiguo del municipio (hoy Embu das Artes),CP 06814: 14 de 14 clientes vecinos en embu das artes (SP),2026-11-26
+florianopolis,SP,88075,florianopolis,SC,florianopolis,Ciudad correcta con estado incorrecto (SP en vez de SC),CP 88075: 12 de 12 clientes vecinos en florianopolis (SC),2026-11-26
+goioere,SP,87360,goioere,PR,goioere,Ciudad correcta con estado incorrecto (SP en vez de PR),CP 87360: 11 de 11 clientes vecinos en goioere (PR),2026-11-26
+ipira,SP,44600,ipira,BA,ipira,Ciudad correcta con estado incorrecto (SP en vez de BA),CP 44600: 8 de 8 clientes vecinos en ipira (BA),2026-11-26
+itajai,SP,88301,itajai,SC,itajai,Ciudad correcta con estado incorrecto (SP en vez de SC),CP 88301: 16 de 16 clientes vecinos en itajai (SC),2026-11-26
+juiz de fora,SP,36010,juiz de fora,MG,juiz de fora,Ciudad correcta con estado incorrecto (SP en vez de MG),CP 36010: 36 de 36 clientes vecinos en juiz de fora (MG),2026-11-26
+laguna,SP,88790,laguna,SC,laguna,Ciudad correcta con estado incorrecto (SP en vez de SC),CP 88790: 14 de 14 clientes vecinos en laguna (SC),2026-11-26
+laranjeiras do sul,SP,85301,laranjeiras do sul,PR,laranjeiras do sul,Ciudad correcta con estado incorrecto (SP en vez de PR),CP 85301: 17 de 17 clientes vecinos en laranjeiras do sul (PR),2026-11-26
+marechal candido rondon,SP,85960,marechal candido rondon,PR,marechal candido rondon,Ciudad correcta con estado incorrecto (SP en vez de PR),CP 85960: 31 de 31 clientes vecinos en marechal candido rondon (PR),2026-11-26
+palhoca,SP,88136,palhoca,SC,palhoca,Ciudad correcta con estado incorrecto (SP en vez de SC),CP 88136: 6 de 6 clientes vecinos en palhoca (SC),2026-11-26
+pinhais,SP,83321,pinhais,PR,pinhais,Ciudad correcta con estado incorrecto (SP en vez de PR),CP 83321: 9 de 9 clientes vecinos en pinhais (PR),2026-11-26
+porto alegre,SP,91520,porto alegre,RS,porto alegre,Ciudad correcta con estado incorrecto (SP en vez de RS),CP 91520: 18 de 18 clientes vecinos en porto alegre (RS),2026-11-26
+rio de janeiro,SP,21320,rio de janeiro,RJ,rio de janeiro,Ciudad correcta con estado incorrecto (SP en vez de RJ),CP 21320: 16 de 16 clientes vecinos en rio de janeiro (RJ),2026-11-26
+rio de janeiro,SP,22783,rio de janeiro,RJ,rio de janeiro,Ciudad correcta con estado incorrecto (SP en vez de RJ),CP 22783: 45 de 45 clientes vecinos en rio de janeiro (RJ),2026-11-26
+sao jose dos pinhais,SP,83020,sao jose dos pinhais,PR,sao jose dos pinhais,Ciudad correcta con estado incorrecto (SP en vez de PR),CP 83020: 5 de 5 clientes vecinos en sao jose dos pinhais (PR),2026-11-26
+sbc,SP,09861,sao bernardo do campo,SP,sao bernardo do campo,Abreviatura de la ciudad,CP 09861: 27 de 27 clientes vecinos en sao bernardo do campo (SP),2026-11-26
+sertanopolis,SP,86170,sertanopolis,PR,sertanopolis,Ciudad correcta con estado incorrecto (SP en vez de PR),CP 86170: 4 de 4 clientes vecinos en sertanopolis (PR),2026-11-26
+tocantins,SP,36512,tocantins,MG,tocantins,Ciudad correcta con estado incorrecto (SP en vez de MG),CP 36512: 6 de 6 clientes vecinos en tocantins (MG),2026-11-26
+vila velha,SP,29101,vila velha,ES,vila velha,Ciudad correcta con estado incorrecto (SP en vez de ES),CP 29101: 101 de 101 clientes vecinos en vila velha (ES),2026-11-26
+volta redonda,SP,27277,volta redonda,RJ,volta redonda,Ciudad correcta con estado incorrecto (SP en vez de RJ),CP 27277: 8 de 8 clientes vecinos en volta redonda (RJ),2026-11-26
