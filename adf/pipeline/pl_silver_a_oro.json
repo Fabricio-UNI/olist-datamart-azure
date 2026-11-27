@@ -1,0 +1,96 @@
+{
+	"name": "pl_silver_a_oro",
+	"properties": {
+		"activities": [
+			{
+				"name": "Por cada tabla",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.tablas",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Copiar a staging",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "ParquetSource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "ParquetReadSettings"
+									}
+								},
+								"sink": {
+									"type": "AzureSqlSink",
+									"preCopyScript": "TRUNCATE TABLE stg.@{item()}",
+									"writeBehavior": "insert",
+									"sqlWriterUseTableLock": false,
+									"disableMetricsCollection": false
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "ds_silver_parquet",
+									"type": "DatasetReference",
+									"parameters": {
+										"tabla": "@item()"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "ds_sql_stg",
+									"type": "DatasetReference",
+									"parameters": {
+										"tabla": "@item()"
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"tablas": {
+				"type": "array",
+				"defaultValue": [
+					"orders",
+					"order_items",
+					"payments",
+					"products",
+					"category_translation",
+					"sellers",
+					"customers"
+				]
+			}
+		},
+		"annotations": []
+	}
+}
