@@ -6,8 +6,6 @@
 			{
 				"name": "Silver Orders",
 				"type": "ExecuteDataFlow",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -44,8 +42,6 @@
 			{
 				"name": "Silver Order Items",
 				"type": "ExecuteDataFlow",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -82,8 +78,6 @@
 			{
 				"name": "Silver Payments",
 				"type": "ExecuteDataFlow",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -120,8 +114,6 @@
 			{
 				"name": "Silver Category Translation",
 				"type": "ExecuteDataFlow",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -193,6 +185,113 @@
 						"type": "IntegrationRuntimeReference"
 					},
 					"traceLevel": "Coarse"
+				}
+			},
+			{
+				"name": "Silver Sellers",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "df_silver_sellers",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"srcSellers": {
+								"nombre_archivo": "olist_sellers_dataset.csv",
+								"carpeta": "olist"
+							},
+							"srcMapa": {
+								"tabla": "mapa_ciudades"
+							},
+							"sinkSellers": {
+								"tabla": "sellers"
+							},
+							"sinkRechazosSellers": {
+								"tabla": "sellers"
+							}
+						}
+					},
+					"integrationRuntime": {
+						"referenceName": "ir-dataflows",
+						"type": "IntegrationRuntimeReference"
+					},
+					"traceLevel": "Coarse"
+				}
+			},
+			{
+				"name": "df_silver_customers",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "df_silver_customers",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"srcCustomers": {
+								"nombre_archivo": "olist_customers_dataset.csv",
+								"carpeta": "olist"
+							},
+							"srcMapa": {
+								"tabla": "mapa_ciudades"
+							},
+							"sinkRechazosCustomers": {
+								"tabla": "customers"
+							},
+							"sinkCustomers": {
+								"tabla": "customers"
+							}
+						}
+					},
+					"integrationRuntime": {
+						"referenceName": "ir-dataflows",
+						"type": "IntegrationRuntimeReference"
+					},
+					"traceLevel": "Coarse"
+				}
+			},
+			{
+				"name": "Notebook Ciudades",
+				"type": "SynapseNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"snapshot": true,
+					"sparkPool": {
+						"referenceName": {
+							"value": "sparkolist",
+							"type": "Expression"
+						},
+						"type": "BigDataPoolReference"
+					},
+					"executorSize": "Small",
+					"driverSize": "Small"
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_synapse_olist",
+					"type": "LinkedServiceReference"
 				}
 			}
 		],

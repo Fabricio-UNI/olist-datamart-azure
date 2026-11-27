@@ -1,0 +1,137 @@
+{
+	"name": "df_silver_customers",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_bronze_csv",
+						"type": "DatasetReference"
+					},
+					"name": "srcCustomers"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_silver_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "srcMapa"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_silver_rechazados",
+						"type": "DatasetReference"
+					},
+					"name": "sinkRechazosCustomers"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_silver_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "sinkCustomers"
+				}
+			],
+			"transformations": [
+				{
+					"name": "limpiarCustomers"
+				},
+				{
+					"name": "unirMapa"
+				},
+				{
+					"name": "elegirColumnas"
+				},
+				{
+					"name": "Validar"
+				},
+				{
+					"name": "Dedup"
+				},
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          customer_id as string,",
+				"          customer_unique_id as string,",
+				"          customer_zip_code_prefix as string,",
+				"          customer_city as string,",
+				"          customer_state as string",
+				"     ),",
+				"     allowSchemaDrift: false,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> srcCustomers",
+				"source(output(",
+				"          ciudad_origen as string,",
+				"          estado_origen as string,",
+				"          cp as string,",
+				"          localidad as string,",
+				"          estado as string,",
+				"          municipio as string,",
+				"          cod_municipio_ibge as integer,",
+				"          metodo as string,",
+				"          distancia as integer,",
+				"          fecha_carga as timestamp",
+				"     ),",
+				"     allowSchemaDrift: false,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> srcMapa",
+				"srcCustomers derive(customer_id = trim(customer_id),",
+				"          customer_unique_id = trim(customer_unique_id),",
+				"          estado_limpio = upper(trim(customer_state)),",
+				"          customer_zip_code_prefix = trim(customer_zip_code_prefix)) ~> limpiarCustomers",
+				"limpiarCustomers, srcMapa join(customer_city == ciudad_origen",
+				"     && customer_state == estado_origen",
+				"     && customer_zip_code_prefix == cp,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> unirMapa",
+				"unirMapa select(mapColumn(",
+				"          customer_id,",
+				"          customer_unique_id,",
+				"          customer_zip_code_prefix,",
+				"          customer_city,",
+				"          customer_state,",
+				"          localidad,",
+				"          estado,",
+				"          municipio,",
+				"          cod_municipio_ibge,",
+				"          metodo_cuidad = metodo,",
+				"          fecha_carga",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> elegirColumnas",
+				"elegirColumnas split(isNull(customer_id) || customer_id == '' || isNull(customer_unique_id) || customer_unique_id == '' || !regexMatch(customer_zip_code_prefix, '^[0-9]{5}$') || isNull(localidad),",
+				"     disjoint: false) ~> Validar@(rechazados, validos)",
+				"Validar@validos aggregate(groupBy(customer_id),",
+				"     each(match(name != 'customer_id'), $$ = first($$))) ~> Dedup",
+				"Validar@rechazados derive(motivo_rechazo = case(isNull(customer_id) || customer_id == '', 'sin_customer_id', isNull(customer_unique_id) || customer_unique_id == '', 'sin_customer_unique_id', !regexMatch(customer_zip_code_prefix, '^[0-9]{5}$'), 'cp_invalido', 'sin_mapa_ciudad')) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     truncate: true,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkRechazosCustomers",
+				"Dedup sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     truncate: true,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkCustomers"
+			]
+		}
+	}
+}
