@@ -10,6 +10,26 @@
 		},
 		"ls_keyvault_properties_typeProperties_baseUrl": {
 			"value": "https://kv-olist-fabri01.vault.azure.net/"
+		},
+		"ls_sql_olist_properties_typeProperties_server": {
+			"value": "sql-olist-fabri01.database.windows.net"
+		},
+		"ls_sql_olist_properties_typeProperties_database": {
+			"value": "olist_oro"
+		},
+		"ls_synapse_olist_properties_typeProperties_endpoint": {
+			"value": "https://syn-olist-fabri01.dev.azuresynapse.net"
+		},
+		"tr_diario_2am_properties_pl_olist_completo_parameters_tablas": {
+			"value": [
+				"orders",
+				"order_items",
+				"payments",
+				"products",
+				"category_translation",
+				"sellers",
+				"customers"
+			]
 		}
 	}
 }

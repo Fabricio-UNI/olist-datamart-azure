@@ -14,12 +14,750 @@
 		"ls_keyvault_properties_typeProperties_baseUrl": {
 			"type": "string",
 			"defaultValue": "https://kv-olist-fabri01.vault.azure.net/"
+		},
+		"ls_sql_olist_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "sql-olist-fabri01.database.windows.net"
+		},
+		"ls_sql_olist_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "olist_oro"
+		},
+		"ls_synapse_olist_properties_typeProperties_endpoint": {
+			"type": "string",
+			"defaultValue": "https://syn-olist-fabri01.dev.azuresynapse.net"
+		},
+		"tr_diario_2am_properties_pl_olist_completo_parameters_tablas": {
+			"type": "array",
+			"defaultValue": [
+				"orders",
+				"order_items",
+				"payments",
+				"products",
+				"category_translation",
+				"sellers",
+				"customers"
+			]
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_bronze_a_silver')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Orquesta bronce → plata: un flujo de datos por tabla de Olist, más el notebook de ciudades.",
+				"activities": [
+					{
+						"name": "Silver Orders",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_silver_orders",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"srcOrders": {
+										"nombre_archivo": "olist_orders_dataset.csv",
+										"carpeta": "olist"
+									},
+									"sinkOrders": {
+										"tabla": "orders"
+									},
+									"sinkRechazosOrders": {
+										"tabla": "orders"
+									}
+								}
+							},
+							"staging": {},
+							"integrationRuntime": {
+								"referenceName": "ir-dataflows",
+								"type": "IntegrationRuntimeReference"
+							},
+							"traceLevel": "Coarse"
+						}
+					},
+					{
+						"name": "Silver Order Items",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_silver_order_items",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"srcOrderItems": {
+										"nombre_archivo": "olist_order_items_dataset.csv",
+										"carpeta": "olist"
+									},
+									"sinkOrderItems": {
+										"tabla": "order_items"
+									},
+									"sinkRechazosOrderItems": {
+										"tabla": "order_items"
+									}
+								}
+							},
+							"staging": {},
+							"integrationRuntime": {
+								"referenceName": "ir-dataflows",
+								"type": "IntegrationRuntimeReference"
+							},
+							"traceLevel": "Coarse"
+						}
+					},
+					{
+						"name": "Silver Payments",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_silver_payments",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"srcPayments": {
+										"nombre_archivo": "olist_order_payments_dataset.csv",
+										"carpeta": "olist"
+									},
+									"sinkPayments": {
+										"tabla": "payments"
+									},
+									"sinkRechazosPayments": {
+										"tabla": "payments"
+									}
+								}
+							},
+							"staging": {},
+							"integrationRuntime": {
+								"referenceName": "ir-dataflows",
+								"type": "IntegrationRuntimeReference"
+							},
+							"traceLevel": "Coarse"
+						}
+					},
+					{
+						"name": "Silver Category Translation",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_silver_category_translation",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"srcTraduccion": {
+										"nombre_archivo": "product_category_name_translation.csv",
+										"carpeta": "olist"
+									},
+									"srcCorreccion": {
+										"nombre_archivo": "correccion_traduccion_categorias.csv",
+										"carpeta": "referencia"
+									},
+									"sinkTraducciones": {
+										"tabla": "category_translation"
+									},
+									"sinkRechazosTraducciones": {
+										"tabla": "category_translation"
+									}
+								}
+							},
+							"staging": {},
+							"integrationRuntime": {
+								"referenceName": "ir-dataflows",
+								"type": "IntegrationRuntimeReference"
+							},
+							"traceLevel": "Coarse"
+						}
+					},
+					{
+						"name": "Silver Products",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_silver_products",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"srcProducts": {
+										"nombre_archivo": "olist_products_dataset.csv",
+										"carpeta": "olist"
+									},
+									"sinkProducts": {
+										"tabla": "products"
+									},
+									"sinkRechazosProducts": {
+										"tabla": "products"
+									}
+								}
+							},
+							"staging": {},
+							"integrationRuntime": {
+								"referenceName": "ir-dataflows",
+								"type": "IntegrationRuntimeReference"
+							},
+							"traceLevel": "Coarse"
+						}
+					},
+					{
+						"name": "Silver Sellers",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "Notebook Ciudades",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_silver_sellers",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"srcSellers": {
+										"nombre_archivo": "olist_sellers_dataset.csv",
+										"carpeta": "olist"
+									},
+									"srcMapa": {
+										"tabla": "mapa_ciudades"
+									},
+									"sinkSellers": {
+										"tabla": "sellers"
+									},
+									"sinkRechazosSellers": {
+										"tabla": "sellers"
+									}
+								}
+							},
+							"staging": {},
+							"integrationRuntime": {
+								"referenceName": "ir-dataflows",
+								"type": "IntegrationRuntimeReference"
+							},
+							"traceLevel": "Coarse"
+						}
+					},
+					{
+						"name": "Silver Customers",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "Notebook Ciudades",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_silver_customers",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"srcCustomers": {
+										"nombre_archivo": "olist_customers_dataset.csv",
+										"carpeta": "olist"
+									},
+									"srcMapa": {
+										"tabla": "mapa_ciudades"
+									},
+									"sinkRechazosCustomers": {
+										"tabla": "customers"
+									},
+									"sinkCustomers": {
+										"tabla": "customers"
+									}
+								}
+							},
+							"staging": {},
+							"integrationRuntime": {
+								"referenceName": "ir-dataflows",
+								"type": "IntegrationRuntimeReference"
+							},
+							"traceLevel": "Coarse"
+						}
+					},
+					{
+						"name": "Notebook Ciudades",
+						"type": "SynapseNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebook": {
+								"referenceName": {
+									"value": "nb_ciudades",
+									"type": "Expression"
+								},
+								"type": "NotebookReference"
+							},
+							"snapshot": true,
+							"sparkPool": {
+								"referenceName": {
+									"value": "sparkolist",
+									"type": "Expression"
+								},
+								"type": "BigDataPoolReference"
+							},
+							"executorSize": "Small",
+							"conf": {
+								"spark.dynamicAllocation.enabled": null,
+								"spark.dynamicAllocation.minExecutors": null,
+								"spark.dynamicAllocation.maxExecutors": null
+							},
+							"driverSize": "Small",
+							"numExecutors": null
+						},
+						"linkedServiceName": {
+							"referenceName": "ls_synapse_olist",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_silver_orders')]",
+				"[concat(variables('factoryId'), '/integrationRuntimes/ir-dataflows')]",
+				"[concat(variables('factoryId'), '/dataflows/df_silver_order_items')]",
+				"[concat(variables('factoryId'), '/dataflows/df_silver_payments')]",
+				"[concat(variables('factoryId'), '/dataflows/df_silver_category_translation')]",
+				"[concat(variables('factoryId'), '/dataflows/df_silver_products')]",
+				"[concat(variables('factoryId'), '/dataflows/df_silver_sellers')]",
+				"[concat(variables('factoryId'), '/dataflows/df_silver_customers')]",
+				"[concat(variables('factoryId'), '/linkedServices/ls_synapse_olist')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_olist_completo')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Bronce a plata",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "pl_bronze_a_silver",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Plata a oro",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Bronce a plata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "pl_silver_a_oro",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"tablas": {
+									"value": "@pipeline().parameters.tablas",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"tablas": {
+						"type": "array",
+						"defaultValue": [
+							"orders",
+							"order_items",
+							"payments",
+							"products",
+							"category_translation",
+							"sellers",
+							"customers"
+						]
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/pl_bronze_a_silver')]",
+				"[concat(variables('factoryId'), '/pipelines/pl_silver_a_oro')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_silver_a_oro')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Por cada tabla",
+						"type": "ForEach",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@pipeline().parameters.tablas",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Copiar a staging",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "ParquetSource",
+											"storeSettings": {
+												"type": "AzureBlobFSReadSettings",
+												"recursive": true,
+												"wildcardFolderPath": {
+													"value": "olist/@{item()}",
+													"type": "Expression"
+												},
+												"wildcardFileName": "*.parquet",
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "ParquetReadSettings"
+											}
+										},
+										"sink": {
+											"type": "AzureSqlSink",
+											"preCopyScript": {
+												"value": "TRUNCATE TABLE stg.@{item()}",
+												"type": "Expression"
+											},
+											"writeBehavior": "insert",
+											"sqlWriterUseTableLock": false,
+											"disableMetricsCollection": false
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "ds_silver_parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"tabla": "@item()"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "ds_sql_stg",
+											"type": "DatasetReference",
+											"parameters": {
+												"tabla": "@item()"
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "Cargar oro",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "Por cada tabla",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dw].[usp_cargar_oro]"
+						},
+						"linkedServiceName": {
+							"referenceName": "ls_sql_olist",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"tablas": {
+						"type": "array",
+						"defaultValue": [
+							"orders",
+							"order_items",
+							"payments",
+							"products",
+							"category_translation",
+							"sellers",
+							"customers"
+						]
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_sql_olist')]",
+				"[concat(variables('factoryId'), '/datasets/ds_silver_parquet')]",
+				"[concat(variables('factoryId'), '/datasets/ds_sql_stg')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_bronze_csv')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_adls_olist",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"nombre_archivo": {
+						"type": "string"
+					},
+					"carpeta": {
+						"type": "string",
+						"defaultValue": "olist"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().nombre_archivo",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().carpeta",
+							"type": "Expression"
+						},
+						"fileSystem": "bronze"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_adls_olist')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_silver_parquet')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_adls_olist",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"tabla": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@concat('olist/', dataset().tabla)",
+							"type": "Expression"
+						},
+						"fileSystem": "silver"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_adls_olist')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_silver_rechazados')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_adls_olist",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"tabla": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@concat('_rechazados/', dataset().tabla)",
+							"type": "Expression"
+						},
+						"fileSystem": "silver"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_adls_olist')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_sql_stg')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_sql_olist",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"tabla": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "stg",
+					"table": {
+						"value": "@dataset().tabla",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_sql_olist')]"
+			]
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/ls_adls_olist')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
@@ -45,6 +783,904 @@
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_sql_olist')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"server": "[parameters('ls_sql_olist_properties_typeProperties_server')]",
+					"database": "[parameters('ls_sql_olist_properties_typeProperties_database')]",
+					"encrypt": "mandatory",
+					"trustServerCertificate": false,
+					"authenticationType": "SystemAssignedManagedIdentity"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_synapse_olist')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSynapseArtifacts",
+				"typeProperties": {
+					"endpoint": "[parameters('ls_synapse_olist_properties_typeProperties_endpoint')]",
+					"authentication": "MSI",
+					"workspaceResourceId": "/subscriptions/581ce099-db04-4a2f-bfa4-6a440e744408/resourceGroups/rg-olist-datamart/providers/Microsoft.Synapse/workspaces/syn-olist-fabri01"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/tr_diario_2am')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "pl_olist_completo",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"tablas": "[parameters('tr_diario_2am_properties_pl_olist_completo_parameters_tablas')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2026-11-27T16:43:00",
+						"timeZone": "SA Pacific Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								2
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/pl_olist_completo')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ir-dataflows')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "Canada Central",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 10,
+							"cleanup": false,
+							"customProperties": []
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_silver_category_translation')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_bronze_csv",
+								"type": "DatasetReference"
+							},
+							"name": "srcTraduccion"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_bronze_csv",
+								"type": "DatasetReference"
+							},
+							"name": "srcCorreccion"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_silver_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "sinkTraducciones"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_silver_rechazados",
+								"type": "DatasetReference"
+							},
+							"name": "sinkRechazosTraducciones"
+						}
+					],
+					"transformations": [
+						{
+							"name": "marcarOlist"
+						},
+						{
+							"name": "marcarCorreccion"
+						},
+						{
+							"name": "unirTraducciones"
+						},
+						{
+							"name": "limpiarTraducciones"
+						},
+						{
+							"name": "validarTraducciones"
+						},
+						{
+							"name": "dedupTraducciones"
+						},
+						{
+							"name": "motivoTraducciones"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          product_category_name as string,",
+						"          product_category_name_english as string",
+						"     ),",
+						"     allowSchemaDrift: false,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> srcTraduccion",
+						"source(output(",
+						"          product_category_name as string,",
+						"          product_category_name_english as string,",
+						"          motivo as string,",
+						"          fecha_correccion as date",
+						"     ),",
+						"     allowSchemaDrift: false,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> srcCorreccion",
+						"srcTraduccion derive(origen = 'olist') ~> marcarOlist",
+						"srcCorreccion derive(origen = 'correccion') ~> marcarCorreccion",
+						"marcarOlist, marcarCorreccion union(byName: true)~> unirTraducciones",
+						"unirTraducciones derive(product_category_name = lower(trim(product_category_name)),",
+						"          product_category_name_english = lower(trim(product_category_name_english)),",
+						"          fecha_carga = currentTimestamp()) ~> limpiarTraducciones",
+						"limpiarTraducciones split(isNull(product_category_name) || product_category_name == '' || isNull(product_category_name_english) || product_category_name_english == '',",
+						"     disjoint: false) ~> validarTraducciones@(rechazados, validos)",
+						"validarTraducciones@validos aggregate(groupBy(product_category_name),",
+						"     product_category_name_english = coalesce(max(iif(origen == 'correccion', product_category_name_english, toString(null()))), max(product_category_name_english)),",
+						"          origen = iif(max(iif(origen == 'correccion', 1, 0)) == 1, 'correccion', 'olist'),",
+						"          motivo = max(motivo),",
+						"          fecha_correccion = max(fecha_correccion),",
+						"          fecha_carga = max(fecha_carga)) ~> dedupTraducciones",
+						"validarTraducciones@rechazados derive(motivo_rechazo = iif(isNull(product_category_name) || product_category_name == '', 'sin_categoria_pt', 'sin_traduccion')) ~> motivoTraducciones",
+						"dedupTraducciones sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     truncate: true,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkTraducciones",
+						"motivoTraducciones sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     truncate: true,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkRechazosTraducciones"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_bronze_csv')]",
+				"[concat(variables('factoryId'), '/datasets/ds_silver_parquet')]",
+				"[concat(variables('factoryId'), '/datasets/ds_silver_rechazados')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_silver_customers')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_bronze_csv",
+								"type": "DatasetReference"
+							},
+							"name": "srcCustomers"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_silver_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "srcMapa"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_silver_rechazados",
+								"type": "DatasetReference"
+							},
+							"name": "sinkRechazosCustomers"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_silver_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "sinkCustomers"
+						}
+					],
+					"transformations": [
+						{
+							"name": "limpiarCustomers"
+						},
+						{
+							"name": "unirMapa"
+						},
+						{
+							"name": "elegirColumnas"
+						},
+						{
+							"name": "Validar"
+						},
+						{
+							"name": "Dedup"
+						},
+						{
+							"name": "derivedColumn1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          customer_id as string,",
+						"          customer_unique_id as string,",
+						"          customer_zip_code_prefix as string,",
+						"          customer_city as string,",
+						"          customer_state as string",
+						"     ),",
+						"     allowSchemaDrift: false,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> srcCustomers",
+						"source(output(",
+						"          ciudad_origen as string,",
+						"          estado_origen as string,",
+						"          cp as string,",
+						"          localidad as string,",
+						"          estado as string,",
+						"          municipio as string,",
+						"          cod_municipio_ibge as integer,",
+						"          metodo as string,",
+						"          distancia as integer,",
+						"          fecha_carga as timestamp",
+						"     ),",
+						"     allowSchemaDrift: false,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> srcMapa",
+						"srcCustomers derive(customer_id = trim(customer_id),",
+						"          customer_unique_id = trim(customer_unique_id),",
+						"          estado_limpio = upper(trim(customer_state)),",
+						"          customer_zip_code_prefix = trim(customer_zip_code_prefix)) ~> limpiarCustomers",
+						"limpiarCustomers, srcMapa join(customer_city == ciudad_origen",
+						"     && customer_state == estado_origen",
+						"     && customer_zip_code_prefix == cp,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> unirMapa",
+						"unirMapa select(mapColumn(",
+						"          customer_id,",
+						"          customer_unique_id,",
+						"          customer_zip_code_prefix,",
+						"          customer_city,",
+						"          customer_state,",
+						"          localidad,",
+						"          estado,",
+						"          municipio,",
+						"          cod_municipio_ibge,",
+						"          metodo_ciudad = metodo,",
+						"          fecha_carga",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> elegirColumnas",
+						"elegirColumnas split(isNull(customer_id) || customer_id == '' || isNull(customer_unique_id) || customer_unique_id == '' || !regexMatch(customer_zip_code_prefix, '^[0-9]{5}$') || isNull(localidad),",
+						"     disjoint: false) ~> Validar@(rechazados, validos)",
+						"Validar@validos aggregate(groupBy(customer_id),",
+						"     each(match(name!='customer_id'), $$ = first($$))) ~> Dedup",
+						"Validar@rechazados derive(motivo_rechazo = case(isNull(customer_id) || customer_id == '', 'sin_customer_id', isNull(customer_unique_id) || customer_unique_id == '', 'sin_customer_unique_id', !regexMatch(customer_zip_code_prefix, '^[0-9]{5}$'), 'cp_invalido', 'sin_mapa_ciudad')) ~> derivedColumn1",
+						"derivedColumn1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     truncate: true,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkRechazosCustomers",
+						"Dedup sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     truncate: true,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkCustomers"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_bronze_csv')]",
+				"[concat(variables('factoryId'), '/datasets/ds_silver_parquet')]",
+				"[concat(variables('factoryId'), '/datasets/ds_silver_rechazados')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_silver_order_items')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_bronze_csv",
+								"type": "DatasetReference"
+							},
+							"name": "srcOrderItems",
+							"description": "Lee olist_order_items_dataset.csv de bronze. Grano de fact_ventas (1 fila = 1 ítem). price y freight_value en decimal(10,2) (R1)."
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_silver_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "sinkOrderItems"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_silver_rechazados",
+								"type": "DatasetReference"
+							},
+							"name": "sinkRechazosOrderItems"
+						}
+					],
+					"transformations": [
+						{
+							"name": "LimpiarOrderItems",
+							"description": "Limpieza defensiva: trim a las 3 llaves (joins con orders, dim_producto y dim_vendedor). Agrega fecha_carga para linaje."
+						},
+						{
+							"name": "validarOrderItems",
+							"description": "Cuarentena: rechaza ítems sin llave, sin producto, sin vendedor, con precio <= 0 o flete negativo. Flete 0 es válido (R9, envío gratis)."
+						},
+						{
+							"name": "dedupOrderItems",
+							"description": "Una fila por order_id + order_item_id (grano de fact_ventas). Protege contra ventas duplicadas."
+						},
+						{
+							"name": "motivoOrderItems"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          order_id as string,",
+						"          order_item_id as integer,",
+						"          product_id as string,",
+						"          seller_id as string,",
+						"          shipping_limit_date as timestamp 'yyyy-MM-dd HH:mm:ss',",
+						"          price as decimal(10,2),",
+						"          freight_value as decimal(10,2)",
+						"     ),",
+						"     allowSchemaDrift: false,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> srcOrderItems",
+						"srcOrderItems derive(order_id = trim(order_id),",
+						"          product_id = trim(product_id),",
+						"          seller_id = trim(seller_id),",
+						"          fecha_carga = currentTimestamp()) ~> LimpiarOrderItems",
+						"LimpiarOrderItems split(isNull(order_id) || order_id == '' || isNull(order_item_id) || order_item_id < 1 || isNull(product_id) || product_id == '' || isNull(seller_id) || seller_id == '' || isNull(price) || price <= 0 || isNull(freight_value) || freight_value < 0,",
+						"     disjoint: false) ~> validarOrderItems@(rechazados, validos)",
+						"validarOrderItems@validos aggregate(groupBy(order_id,",
+						"          order_item_id),",
+						"     each(match(!in(['order_id','order_item_id'],name)), $$ = first($$))) ~> dedupOrderItems",
+						"validarOrderItems@rechazados derive(motivo_rechazo = case(   isNull(order_id) || order_id == '' || isNull(order_item_id) || order_item_id < 1, 'llave_invalida',   isNull(product_id) || product_id == '', 'sin_product_id',   isNull(seller_id) || seller_id == '', 'sin_seller_id',   isNull(price) || price <= 0, 'precio_invalido',   'flete_invalido' )) ~> motivoOrderItems",
+						"dedupOrderItems sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     truncate: true,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkOrderItems",
+						"motivoOrderItems sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     truncate: true,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkRechazosOrderItems"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_bronze_csv')]",
+				"[concat(variables('factoryId'), '/datasets/ds_silver_parquet')]",
+				"[concat(variables('factoryId'), '/datasets/ds_silver_rechazados')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_silver_orders')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_bronze_csv",
+								"type": "DatasetReference"
+							},
+							"name": "srcOrders",
+							"description": "Lee olist_orders_dataset.csv de bronze. Tipos declarados (R1): 5 fechas como timestamp yyyy-MM-dd HH:mm:ss. Base de fact_ventas."
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_silver_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "sinkOrders",
+							"description": "Escribe orders limpio en silver/olist/orders/ (Parquet snappy). Origen de fact_ventas en oro."
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_silver_rechazados",
+								"type": "DatasetReference"
+							},
+							"name": "sinkRechazosOrders"
+						}
+					],
+					"transformations": [
+						{
+							"name": "limpiarOrders",
+							"description": "Limpieza defensiva: trim a order_id y customer_id (joins con order_items y dim_cliente), lower+trim a order_status. Agrega fecha_carga para linaje."
+						},
+						{
+							"name": "validarOrders",
+							"description": "Cuarentena: rechaza pedidos sin order_id, sin customer_id, sin fecha de compra (sin sk_fecha_compra) o con estado fuera de los 8 conocidos."
+						},
+						{
+							"name": "dedupOrders",
+							"description": "Garantiza una fila por order_id (grano de orders en plata). Evita duplicar ventas en fact_ventas."
+						},
+						{
+							"name": "motivoOrders"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          order_id as string,",
+						"          customer_id as string,",
+						"          order_status as string,",
+						"          order_purchase_timestamp as timestamp 'yyyy-MM-dd HH:mm:ss',",
+						"          order_approved_at as timestamp 'yyyy-MM-dd HH:mm:ss',",
+						"          order_delivered_carrier_date as timestamp 'yyyy-MM-dd HH:mm:ss',",
+						"          order_delivered_customer_date as timestamp 'yyyy-MM-dd HH:mm:ss',",
+						"          order_estimated_delivery_date as timestamp 'yyyy-MM-dd HH:mm:ss'",
+						"     ),",
+						"     allowSchemaDrift: false,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> srcOrders",
+						"srcOrders derive(order_id = trim(order_id),",
+						"          customer_id = trim(customer_id),",
+						"          order_status = lower(trim(order_status)),",
+						"          fecha_carga = currentTimestamp()) ~> limpiarOrders",
+						"limpiarOrders split(isNull(order_id) || order_id == '' ||\r",
+						"isNull(customer_id) || customer_id == '' ||\r",
+						"isNull(order_purchase_timestamp) ||\r",
+						"!in(['delivered','shipped','canceled','unavailable','invoiced','processing','created','approved'], order_status),",
+						"     disjoint: false) ~> validarOrders@(rechazados, validos)",
+						"validarOrders@validos aggregate(groupBy(order_id),",
+						"     each(match(name!='order_id'), $$ = first($$))) ~> dedupOrders",
+						"validarOrders@rechazados derive(motivo_rechazo = case(   isNull(order_id) || order_id == '', 'sin_order_id',   isNull(customer_id) || customer_id == '', 'sin_customer_id',   isNull(order_purchase_timestamp), 'sin_fecha_compra',   'estado_desconocido' )) ~> motivoOrders",
+						"dedupOrders sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     truncate: true,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkOrders",
+						"motivoOrders sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     truncate: true,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkRechazosOrders"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_bronze_csv')]",
+				"[concat(variables('factoryId'), '/datasets/ds_silver_parquet')]",
+				"[concat(variables('factoryId'), '/datasets/ds_silver_rechazados')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_silver_payments')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_bronze_csv",
+								"type": "DatasetReference"
+							},
+							"name": "srcPayments"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_silver_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "sinkPayments"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_silver_rechazados",
+								"type": "DatasetReference"
+							},
+							"name": "sinkRechazosPayments"
+						}
+					],
+					"transformations": [
+						{
+							"name": "limpiarPayments"
+						},
+						{
+							"name": "validarPayments"
+						},
+						{
+							"name": "dedupPayments"
+						},
+						{
+							"name": "motivoPayments"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          order_id as string,",
+						"          payment_sequential as integer,",
+						"          payment_type as string,",
+						"          payment_installments as integer,",
+						"          payment_value as decimal(10,2)",
+						"     ),",
+						"     allowSchemaDrift: false,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> srcPayments",
+						"srcPayments derive(order_id = trim(order_id),",
+						"          payment_type = lower(trim(payment_type)),",
+						"          payment_installments = iif(payment_installments == 0, toInteger(null()), payment_installments),",
+						"          fecha_carga = currentTimestamp()) ~> limpiarPayments",
+						"limpiarPayments split(isNull(order_id) || order_id == '' || isNull(payment_sequential) || payment_sequential < 1 || !in(['credit_card','boleto','voucher','debit_card','not_defined'], payment_type) || isNull(payment_value) || payment_value < 0 || payment_installments < 0,",
+						"     disjoint: false) ~> validarPayments@(rechazados, validos)",
+						"validarPayments@validos aggregate(groupBy(order_id,",
+						"          payment_sequential),",
+						"     each(match(!in(['order_id','payment_sequential'],name)), $$ = first($$))) ~> dedupPayments",
+						"validarPayments@rechazados derive(motivo_rechazo = case(   isNull(order_id) || order_id == '' || isNull(payment_sequential) || payment_sequential < 1, 'llave_invalida',   !in(['credit_card','boleto','voucher','debit_card','not_defined'], payment_type), 'medio_desconocido',   isNull(payment_value) || payment_value < 0, 'monto_invalido',   'cuotas_invalidas' )) ~> motivoPayments",
+						"dedupPayments sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     truncate: true,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkPayments",
+						"motivoPayments sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     truncate: true,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkRechazosPayments"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_bronze_csv')]",
+				"[concat(variables('factoryId'), '/datasets/ds_silver_parquet')]",
+				"[concat(variables('factoryId'), '/datasets/ds_silver_rechazados')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_silver_products')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_bronze_csv",
+								"type": "DatasetReference"
+							},
+							"name": "srcProducts"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_silver_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "sinkProducts"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_silver_rechazados",
+								"type": "DatasetReference"
+							},
+							"name": "sinkRechazosProducts"
+						}
+					],
+					"transformations": [
+						{
+							"name": "limpiarProducts"
+						},
+						{
+							"name": "validarProducts"
+						},
+						{
+							"name": "dedupProducts"
+						},
+						{
+							"name": "motivoProducts"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          product_id as string,",
+						"          product_category_name as string,",
+						"          product_name_lenght as integer,",
+						"          product_description_lenght as integer,",
+						"          product_photos_qty as integer,",
+						"          product_weight_g as integer,",
+						"          product_length_cm as integer,",
+						"          product_height_cm as integer,",
+						"          product_width_cm as integer",
+						"     ),",
+						"     allowSchemaDrift: false,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> srcProducts",
+						"srcProducts derive(product_id = trim(product_id),",
+						"          product_category_name = iif(isNull(product_category_name) || trim(product_category_name) == '', toString(null()), lower(trim(product_category_name))),",
+						"          product_weight_g = iif(product_weight_g == 0, toInteger(null()), toInteger(product_weight_g)),",
+						"          product_length_cm = iif(product_length_cm == 0, toInteger(null()), toInteger(product_length_cm)),",
+						"          product_height_cm = iif(product_height_cm == 0, toInteger(null()), toInteger(product_height_cm)),",
+						"          product_width_cm = iif(product_width_cm == 0, toInteger(null()), toInteger(product_width_cm)),",
+						"          fecha_carga = currentTimestamp()) ~> limpiarProducts",
+						"limpiarProducts split(isNull(product_id) || product_id == '' || product_weight_g < 0 || product_photos_qty < 0 || product_length_cm <= 0 || product_height_cm <= 0 || product_width_cm <= 0,",
+						"     disjoint: false) ~> validarProducts@(rechazados, validos)",
+						"validarProducts@validos aggregate(groupBy(product_id),",
+						"     each(match(name!='product_id'), $$ = first($$))) ~> dedupProducts",
+						"validarProducts@rechazados derive(motivo_rechazo = iif(isNull(product_id) || product_id == '', 'sin_product_id', 'medida_invalida')) ~> motivoProducts",
+						"dedupProducts sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     truncate: true,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkProducts",
+						"motivoProducts sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     truncate: true,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkRechazosProducts"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_bronze_csv')]",
+				"[concat(variables('factoryId'), '/datasets/ds_silver_parquet')]",
+				"[concat(variables('factoryId'), '/datasets/ds_silver_rechazados')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_silver_sellers')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_bronze_csv",
+								"type": "DatasetReference"
+							},
+							"name": "srcSellers"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_silver_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "srcMapa"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_silver_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "sinkSellers"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_silver_rechazados",
+								"type": "DatasetReference"
+							},
+							"name": "sinkRechazosSellers"
+						}
+					],
+					"transformations": [
+						{
+							"name": "limpiarSellers"
+						},
+						{
+							"name": "unirMapa"
+						},
+						{
+							"name": "elegirColumnas"
+						},
+						{
+							"name": "validarSellers"
+						},
+						{
+							"name": "dedupSellers"
+						},
+						{
+							"name": "motivoSellers"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          seller_id as string,",
+						"          seller_zip_code_prefix as string,",
+						"          seller_city as string,",
+						"          seller_state as string",
+						"     ),",
+						"     allowSchemaDrift: false,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> srcSellers",
+						"source(output(",
+						"          ciudad_origen as string,",
+						"          estado_origen as string,",
+						"          cp as string,",
+						"          localidad as string,",
+						"          estado as string,",
+						"          municipio as string,",
+						"          cod_municipio_ibge as integer,",
+						"          metodo as string,",
+						"          distancia as integer,",
+						"          fecha_carga as timestamp",
+						"     ),",
+						"     allowSchemaDrift: false,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> srcMapa",
+						"srcSellers derive(seller_id = trim(seller_id),",
+						"          seller_zip_code_prefix = trim(seller_zip_code_prefix),",
+						"          estado_limpio = upper(trim(seller_state)),",
+						"          fecha_carga = currentTimestamp()) ~> limpiarSellers",
+						"limpiarSellers, srcMapa join(seller_city == ciudad_origen",
+						"     && estado_limpio == estado_origen",
+						"     && seller_zip_code_prefix == cp,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> unirMapa",
+						"unirMapa select(mapColumn(",
+						"          seller_id,",
+						"          seller_zip_code_prefix,",
+						"          seller_city,",
+						"          seller_state,",
+						"          fecha_carga = limpiarSellers@fecha_carga,",
+						"          localidad,",
+						"          estado,",
+						"          municipio,",
+						"          cod_municipio_ibge,",
+						"          metodo_ciudad = metodo",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> elegirColumnas",
+						"elegirColumnas split(isNull(seller_id) || seller_id == '' || !regexMatch(seller_zip_code_prefix, '^[0-9]{5}$') || isNull(localidad),",
+						"     disjoint: false) ~> validarSellers@(rechazados, validos)",
+						"validarSellers@validos aggregate(groupBy(seller_id),",
+						"     each(match(name!='seller_id'), $$ = first($$))) ~> dedupSellers",
+						"validarSellers@rechazados derive(motivo_rechazo = case(isNull(seller_id) || seller_id == '', 'sin_seller_id',      !regexMatch(seller_zip_code_prefix, '^[0-9]{5}$'), 'cp_invalido',      'sin_mapa_ciudad')) ~> motivoSellers",
+						"dedupSellers sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     truncate: true,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkSellers",
+						"motivoSellers sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     truncate: true,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkRechazosSellers"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_bronze_csv')]",
+				"[concat(variables('factoryId'), '/datasets/ds_silver_parquet')]",
+				"[concat(variables('factoryId'), '/datasets/ds_silver_rechazados')]"
+			]
 		}
 	]
 }
