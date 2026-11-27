@@ -1,0 +1,32 @@
+{
+  "name": "Olist Data Mart",
+  "dataColors": ["#18345E", "#3D7DCA", "#7FB2E5", "#E07A2F", "#2A9D8F", "#C9A227", "#9A4F96", "#8A94A6"],
+  "background": "#FFFFFF",
+  "foreground": "#1C1C1E",
+  "tableAccent": "#18345E",
+  "good": "#2A9D8F",
+  "neutral": "#C9A227",
+  "bad": "#C0392B",
+  "maximum": "#18345E",
+  "center": "#7FB2E5",
+  "minimum": "#E8EEF7",
+  "textClasses": {
+    "callout": { "fontFace": "Segoe UI Semibold", "fontSize": 26, "color": "#18345E" },
+    "title": { "fontFace": "Segoe UI Semibold", "fontSize": 12, "color": "#1C1C1E" },
+    "header": { "fontFace": "Segoe UI Semibold", "fontSize": 11, "color": "#1C1C1E" },
+    "label": { "fontFace": "Segoe UI", "fontSize": 10, "color": "#5F636A" }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [{ "show": false }],
+        "border": [{ "show": false }],
+        "dropShadow": [{ "show": false }],
+        "visualHeader": [{ "show": false }]
+      }
+    },
+    "card": { "*": { "categoryLabels": [{ "show": false }], "title": [{ "show": false }] } },
+    "cardVisual": { "*": { "title": [{ "show": false }] } },
+    "slicer": { "*": { "header": [{ "show": false }], "title": [{ "show": false }] } }
+  }
+}
