@@ -31,6 +31,8 @@
 									"storeSettings": {
 										"type": "AzureBlobFSReadSettings",
 										"recursive": true,
+										"wildcardFolderPath": "olist/@{item()}",
+										"wildcardFileName": "*.parquet",
 										"enablePartitionDiscovery": false
 									},
 									"formatSettings": {
