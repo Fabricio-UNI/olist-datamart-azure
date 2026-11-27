@@ -5,14 +5,7 @@
 			{
 				"name": "Por cada tabla",
 				"type": "ForEach",
-				"dependsOn": [
-					{
-						"activity": "Cargar oro",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
@@ -88,7 +81,14 @@
 			{
 				"name": "Cargar oro",
 				"type": "SqlServerStoredProcedure",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Por cada tabla",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
