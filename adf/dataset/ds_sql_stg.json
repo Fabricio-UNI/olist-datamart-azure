@@ -1,0 +1,21 @@
+{
+	"name": "ds_sql_stg",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_sql_olist",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"tabla": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "stg",
+			"table": "@dataset().tabla"
+		}
+	}
+}
