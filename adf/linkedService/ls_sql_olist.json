@@ -1,0 +1,14 @@
+{
+	"name": "ls_sql_olist",
+	"properties": {
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"server": "sql-olist-fabri01.database.windows.net",
+			"database": "olist_oro",
+			"encrypt": "mandatory",
+			"trustServerCertificate": false,
+			"authenticationType": "SystemAssignedManagedIdentity"
+		}
+	}
+}
