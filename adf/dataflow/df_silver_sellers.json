@@ -1,0 +1,135 @@
+{
+	"name": "df_silver_sellers",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_bronze_csv",
+						"type": "DatasetReference"
+					},
+					"name": "srcSellers"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_silver_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "srcMapa"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_silver_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "sinkSellers"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_silver_rechazados",
+						"type": "DatasetReference"
+					},
+					"name": "sinkRechazosSellers"
+				}
+			],
+			"transformations": [
+				{
+					"name": "limpiarSellers"
+				},
+				{
+					"name": "unirMapa"
+				},
+				{
+					"name": "elegirColumnas"
+				},
+				{
+					"name": "validarSellers"
+				},
+				{
+					"name": "dedupSellers"
+				},
+				{
+					"name": "motivoSellers"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          seller_id as string,",
+				"          seller_zip_code_prefix as string,",
+				"          seller_city as string,",
+				"          seller_state as string",
+				"     ),",
+				"     allowSchemaDrift: false,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> srcSellers",
+				"source(output(",
+				"          ciudad_origen as string,",
+				"          estado_origen as string,",
+				"          cp as string,",
+				"          localidad as string,",
+				"          estado as string,",
+				"          municipio as string,",
+				"          cod_municipio_ibge as integer,",
+				"          metodo as string,",
+				"          distancia as integer,",
+				"          fecha_carga as timestamp",
+				"     ),",
+				"     allowSchemaDrift: false,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> srcMapa",
+				"srcSellers derive(seller_id = trim(seller_id),",
+				"          seller_zip_code_prefix = trim(seller_zip_code_prefix),",
+				"          estado_limpio = upper(trim(seller_state)),",
+				"          fecha_carga = currentTimestamp()) ~> limpiarSellers",
+				"limpiarSellers, srcMapa join(seller_city == ciudad_origen",
+				"     && estado_limpio == estado_origen",
+				"     && seller_zip_code_prefix == cp,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> unirMapa",
+				"unirMapa select(mapColumn(",
+				"          seller_id,",
+				"          seller_zip_code_prefix,",
+				"          seller_city,",
+				"          seller_state,",
+				"          fecha_carga = limpiarSellers@fecha_carga,",
+				"          localidad,",
+				"          estado,",
+				"          municipio,",
+				"          cod_municipio_ibge,",
+				"          metodo_ibge = metodo",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> elegirColumnas",
+				"elegirColumnas split(isNull(seller_id) || seller_id == '' || !regexMatch(seller_zip_code_prefix, '^[0-9]{5}$') || isNull(localidad),",
+				"     disjoint: false) ~> validarSellers@(rechazados, validos)",
+				"validarSellers@validos aggregate(groupBy(seller_id),",
+				"     each(match(name != 'seller_id'), $$ = first($$))) ~> dedupSellers",
+				"validarSellers@rechazados derive(motivo_rechazo = case(isNull(seller_id) || seller_id == '', 'sin_seller_id',      !regexMatch(seller_zip_code_prefix, '^[0-9]{5}$'), 'cp_invalido',      'sin_mapa_ciudad')) ~> motivoSellers",
+				"dedupSellers sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     truncate: true,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkSellers",
+				"motivoSellers sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     truncate: true,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkRechazosSellers"
+			]
+		}
+	}
+}
