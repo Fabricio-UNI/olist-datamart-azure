@@ -38,10 +38,27 @@
 						"referenceName": "pl_silver_a_oro",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": true
+					"waitOnCompletion": true,
+					"parameters": {
+						"tablas": "@pipeline().parameters.tablas"
+					}
 				}
 			}
 		],
+		"parameters": {
+			"tablas": {
+				"type": "array",
+				"defaultValue": [
+					"orders",
+					"order_items",
+					"payments",
+					"products",
+					"category_translation",
+					"sellers",
+					"customers"
+				]
+			}
+		},
 		"annotations": []
 	}
 }
