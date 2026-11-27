@@ -2,7 +2,7 @@
 
 Proyecto de ingeniería de datos de punta a punta: lleva el dataset público de **Olist** (e-commerce brasileño: 9 archivos CSV, **99,441 pedidos**) desde los archivos crudos hasta un **modelo estrella en Azure SQL**, con **arquitectura medallón** (bronce → plata → oro), validaciones de calidad verificadas capa por capa, seguridad sin contraseñas y todo versionado en Git.
 
-> **Estado (27/11/2026):** bronce, plata, oro y orquestación terminados y verificados. Tablero de Power BI en construcción.
+> **Estado (27/11/2026):** terminado. Bronce, plata, oro, orquestación diaria y tablero de Power BI de 5 páginas, verificados capa por capa.
 
 ## Resultados en números
 
@@ -13,6 +13,20 @@ Proyecto de ingeniería de datos de punta a punta: lleva el dataset público de 
 | Ciudades | 15,249 formas distintas de escribir (ciudad, estado, CP) → **15,102 ubicaciones** a nivel de municipio oficial del IBGE; São Paulo, escrita de 9 formas, unificada; estado corregido en 34 vendedores |
 | Conciliación | 98.6% de los pedidos: lo pagado cuadra exacto con lo vendido; 20 alertas reales tras filtrar el redondeo de cuotas |
 | Carga | Idempotente (ejecutarla dos veces no duplica nada) y transaccional (si falla, el modelo no queda a medias). Plata → oro en ~1 minuto |
+
+## Tablero de Power BI
+
+5 páginas sobre el modelo estrella (modo Importar, conexión con un usuario de solo lectura). Responde las 12 preguntas de negocio de [`docs/decisiones_modelo.md`](docs/decisiones_modelo.md). Archivo: [`powerbi/olist_datamart.pbix`](powerbi/olist_datamart.pbix).
+
+![Resumen](docs/capturas/01_resumen.png)
+
+| Ventas | Entregas |
+|---|---|
+| ![Ventas](docs/capturas/02_ventas.png) | ![Entregas](docs/capturas/03_entregas.png) |
+| **Pagos** | **Calidad de datos** |
+| ![Pagos](docs/capturas/04_pagos.png) | ![Calidad de datos](docs/capturas/05_calidad.png) |
+
+Medidas DAX en una tabla `_Medidas` con carpetas (ventas, entregas, pagos, calidad). Reglas que respetan: las ventas excluyen cancelados; los pedidos se cuentan con `DISTINCTCOUNT`; el % de entregas tardías se mide por pedido (no por ítem); la fecha de compra es la relación activa en todos los hechos, y la de entrega se activa con `USERELATIONSHIP` solo donde hace falta.
 
 ## Arquitectura
 
@@ -45,7 +59,7 @@ flowchart LR
 | Estandarización de ciudades | Azure Synapse Analytics: pool de Spark (PySpark) |
 | Data mart (oro) | Azure SQL Database (serverless, oferta gratuita): T-SQL, MERGE, procedimientos almacenados, vistas |
 | Seguridad | Microsoft Entra (identidades administradas, solo autenticación Entra), RBAC, Key Vault, mínimo privilegio |
-| Visualización | Power BI |
+| Visualización | Power BI: modelo estrella, medidas DAX, 5 páginas |
 | Control de versiones | Git y GitHub |
 
 ## Modelo estrella (oro)
@@ -126,7 +140,7 @@ sql/
   gold/           01 esquemas y seguridad · 02 staging · 03 dimensiones · 04 dim_fecha
                   05 hechos · 06 procedimientos MERGE · 07 vistas · 08 lectura para Power BI
 docs/         Decisiones de diseño, perfilamiento y capturas
-powerbi/      Tablero (en construcción)
+powerbi/      Tablero (.pbix), tema y fondos de página (diseno/)
 ```
 
 ## Cómo reproducirlo
