@@ -8,6 +8,17 @@
 				"pipelineReference": {
 					"referenceName": "pl_olist_completo",
 					"type": "PipelineReference"
+				},
+				"parameters": {
+					"tablas": [
+						"orders",
+						"order_items",
+						"payments",
+						"products",
+						"category_translation",
+						"sellers",
+						"customers"
+					]
 				}
 			}
 		],
