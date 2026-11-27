@@ -1,0 +1,12 @@
+{
+	"name": "ls_synapse_olist",
+	"properties": {
+		"annotations": [],
+		"type": "AzureSynapseArtifacts",
+		"typeProperties": {
+			"endpoint": "https://syn-olist-fabri01.dev.azuresynapse.net",
+			"authentication": "MSI",
+			"workspaceResourceId": "/subscriptions/581ce099-db04-4a2f-bfa4-6a440e744408/resourceGroups/rg-olist-datamart/providers/Microsoft.Synapse/workspaces/syn-olist-fabri01"
+		}
+	}
+}
