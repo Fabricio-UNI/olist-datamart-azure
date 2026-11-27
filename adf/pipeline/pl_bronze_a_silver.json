@@ -234,7 +234,7 @@
 				}
 			},
 			{
-				"name": "Silver Costumer",
+				"name": "Silver Customers",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
